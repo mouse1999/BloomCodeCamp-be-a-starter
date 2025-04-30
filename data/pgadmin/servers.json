@@ -6,7 +6,7 @@
       "Port": 5432,
       "Username": "docker",
       "Password": "docker",
-      "Host": "pgFP-api-starter",
+      "Host": "pgbd",
       "SSLMode": "prefer",
       "MaintenanceDB": "postgres"
     }
