@@ -4,8 +4,8 @@
       "Name": "api-starter-0121",
       "Group": "Dev",
       "Port": 5432,
-      "Username": "docker",
-      "Password": "docker",
+      "Username": "postgresOne",
+      "Password": "Victor?!$070",
       "Host": "pgbd",
       "SSLMode": "prefer",
       "MaintenanceDB": "postgres"
