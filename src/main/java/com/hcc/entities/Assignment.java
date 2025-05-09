@@ -111,7 +111,6 @@ public class Assignment {
     }
 
     public static final class Builder {
-        private Long id;
         private String status;
         private Integer number;
         private String githubUrl;
@@ -121,10 +120,6 @@ public class Assignment {
 
         private Builder() {}
 
-        public Builder id(Long id) {
-            this.id = id;
-            return this;
-        }
 
         public Builder status(String status) {
             this.status = status;

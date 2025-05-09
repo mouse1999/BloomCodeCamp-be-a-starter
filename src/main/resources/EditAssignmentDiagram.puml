@@ -1,0 +1,41 @@
+@startuml
+actor Learner as "Learner (Jen)"
+participant "Frontend (UI)" as Frontend
+participant "JwtAuthFilter" as AuthFilter
+participant "AssignmentController" as Controller
+participant "AssignmentService" as Service
+participant "AssignmentRepository" as Repository
+
+Learner -> Frontend : Clicks "Edit" on Rejected Assignment
+activate Frontend
+
+Frontend -> Frontend : Attaches JWT to Authorization Header
+Frontend -> Controller : GET /api/assignments/{id} + JWT
+activate Controller
+
+Controller -> AuthFilter : Intercepts request
+activate AuthFilter
+AuthFilter -> AuthFilter : Validates JWT & extracts userId
+AuthFilter --> Controller : Sets SecurityContext (Authenticated)
+deactivate AuthFilter
+
+Controller -> Service : getAssignment(id)
+activate Service
+
+Service -> Service : Checks ownership\n(SecurityContext.userId == assignment.userId)
+Service -> Repository : findById(id)
+activate Repository
+Repository --> Service : Assignment (status=REJECTED)
+deactivate Repository
+
+Service --> Controller : AssignmentDTO
+deactivate Service
+
+Controller --> Frontend : 200 OK + AssignmentDTO
+deactivate Controller
+
+Frontend -> Learner : Pre-fills edit form
+deactivate Frontend
+
+... (Resubmission flow similar, with JWT validation) ...
+@enduml

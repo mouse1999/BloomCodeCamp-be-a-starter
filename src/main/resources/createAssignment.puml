@@ -1,0 +1,47 @@
+@startuml
+
+
+actor User as "Learner (Jen)"
+participant Frontend as "Frontend (UI)"
+participant "JwtAuthFilter" as AuthFilter
+participant "AssignmentController" as Controller
+participant "AssignmentService" as Service
+participant "AssignmentRepository" as Repository
+
+
+User -> Frontend : 1. Clicks "Create New Assignment"
+Frontend -> Frontend : 2. Prepares DTO\n(Number, GitHub URL, Branch)
+Frontend -> Frontend : 3. Attaches JWT to Header
+Frontend -> Controller : 4. POST /api/assignments
+
+Controller -> AuthFilter : 5. Intercepts request
+activate AuthFilter
+AuthFilter -> AuthFilter : 6. Validates JWT\n(Extracts User ID)
+AuthFilter --> Controller : 7. Authenticated
+deactivate AuthFilter
+
+Controller -> Service : 8. createAssignment(assignmentDTO, userId)
+activate Service
+
+Service -> Repository : 9. validateUniqueNumber(dto.number)
+activate Repository
+Repository --> Service : 10. Validation result
+deactivate Repository
+
+Service -> Service : 11. Creates new Assignment:
+Service -> Service : - status = "Pending Submission"
+Service -> Service : - user = authenticatedUser
+Service -> Service : - sets all DTO fields
+
+Service -> Repository : 12. save(assignment)
+activate Repository
+Repository --> Service : 13. Persisted assignment
+deactivate Repository
+
+Service --> Controller : 14. AssignmentDTO
+deactivate Service
+
+Controller --> Frontend : 15. 201 Created + DTO
+Frontend -> User : 16. Shows success notification\nand new assignment
+
+@enduml

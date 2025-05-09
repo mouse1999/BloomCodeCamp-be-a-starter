@@ -1,0 +1,40 @@
+@startuml
+actor Learner
+participant "Frontend (UI)" as Frontend
+participant "AssignmentController" as Controller
+participant "AssignmentService" as Service
+participant "AssignmentRepository" as ARepository
+participant "UserRepository" as URepository
+
+Learner -> Frontend : Clicks "Submit Assignment"
+activate Frontend
+Frontend -> Learner : Displays form
+deactivate Frontend
+
+Learner -> Frontend : Enters GitHub URL, branch\nClicks "Submit"
+activate Frontend
+Frontend -> Controller : POST /api/assignments { githubUrl, branch } + jwt
+activate Controller
+Controller -> Service : submitAssignment(githubUrl, branch, userId) : userid is extracted from jwt securityContext
+activate Service
+
+Service -> URepository : findById(userId)
+activate URepository
+URepository --> Service : Returns User
+deactivate URepository
+
+Service -> Service : Validates GitHub URL/branch
+Service -> Service : Creates Assignment (status=SUBMITTED)
+
+Service -> ARepository : save(assignment)
+activate ARepository
+ARepository --> Service : Saved Assignment
+deactivate ARepository
+
+Service --> Controller : AssignmentDTO
+deactivate Service
+Controller --> Frontend : 201 Created + AssignmentDTO
+deactivate Controller
+Frontend --> Learner : Displays success message
+deactivate Frontend
+@enduml

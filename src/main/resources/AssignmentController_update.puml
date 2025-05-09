@@ -1,0 +1,43 @@
+@startuml
+actor User as "Learner (Jen)"
+participant Frontend as "Frontend (UI)"
+participant "JwtAuthFilter" as AuthFilter
+participant "AssignmentController" as Controller
+participant "AssignmentService" as Service
+participant "AssignmentRepository" as Repository
+
+autonumber
+
+User -> Frontend : 1. Clicks "Update Assignment {assign_id}"
+Frontend -> Frontend : 2. Attaches JWT to Header
+Frontend -> Controller : 3. PUT /api/assignments/assign_id
+
+Controller -> AuthFilter : 4. Intercepts request
+activate AuthFilter
+AuthFilter -> AuthFilter : 5. Validates JWT\n(Sets SecurityContext)
+AuthFilter --> Controller : 6. Authenticated
+deactivate AuthFilter
+
+Controller -> Service : 7. updateAssignment(assign_id, request)
+activate Service
+
+Service -> Repository : 8. findById(assign_id)
+activate Repository
+Repository --> Service : 9. Assignment entity
+deactivate Repository
+
+Service -> Service : 10. Ownership Check:\nSecurityContext.userId == assignment.userId?
+alt 11. Not Owner
+    Service --> Controller : 12. throws AccessDeniedException
+    Controller --> Frontend : 13. 403 Forbidden
+else 11. Owner
+    Service --> Service : create assignment from the request
+    Service --> Repository : save(new assignment)
+    Service --> Controller : 12. AssignmentDTO
+    deactivate Service
+    Controller --> Frontend : 13. 200 OK + DTO
+end
+
+Frontend -> User : 14. Shows edit form or error
+
+@enduml
