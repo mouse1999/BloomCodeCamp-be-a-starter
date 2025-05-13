@@ -1,6 +1,9 @@
 package com.hcc.enums;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hcc.exceptions.assignmentexceptions.InvalidAssignmentNumberException;
+
+import java.util.Arrays;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum AssignmentEnum {
@@ -33,5 +36,12 @@ public enum AssignmentEnum {
 
     public int getAssignmentNumber() {
         return assignmentNumber;
+    }
+    public static AssignmentEnum fromAssignmentNumber(int number) {
+
+        return Arrays.stream(values())
+                .filter((e) -> e.getAssignmentNumber() == number)
+                .findFirst()
+                .orElseThrow(() -> new InvalidAssignmentNumberException("Assignment Number is invalid"));
     }
 }

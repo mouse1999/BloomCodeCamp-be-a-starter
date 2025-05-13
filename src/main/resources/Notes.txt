@@ -1,0 +1,7 @@
+i should implement a claim assignment manager that takes a submitted assignment out of the submitted queue
+so that any other reviewer cant claim that same assignment untill all the  assignments are exhausted for review
+
+PLAN
+=====
+
+if an assignment nummber already exist or taken...through an exception

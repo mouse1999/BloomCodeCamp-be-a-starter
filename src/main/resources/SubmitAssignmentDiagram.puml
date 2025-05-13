@@ -23,7 +23,7 @@ activate URepository
 URepository --> Service : Returns User
 deactivate URepository
 
-Service -> Service : Validates GitHub URL/branch
+Service -> Service : Validates GitHub URL/branch (might be implemented later)
 Service -> Service : Creates Assignment (status=SUBMITTED)
 
 Service -> ARepository : save(assignment)
@@ -31,9 +31,9 @@ activate ARepository
 ARepository --> Service : Saved Assignment
 deactivate ARepository
 
-Service --> Controller : AssignmentDTO
+Service --> Controller : AssignmentModel
 deactivate Service
-Controller --> Frontend : 201 Created + AssignmentDTO
+Controller --> Frontend : 201 Created + submitAssignmentResponseDTO
 deactivate Controller
 Frontend --> Learner : Displays success message
 deactivate Frontend

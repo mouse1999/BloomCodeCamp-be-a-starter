@@ -1,23 +1,36 @@
 package com.hcc.converter;
 
-import com.hcc.dtos.AssignmentDto;
-import com.hcc.dtos.UserDto;
+
+import com.hcc.dtos.response.assignmentdto.AssignmentResponseDto;
 import com.hcc.entities.Assignment;
 import com.hcc.entities.User;
+import com.hcc.models.AssignmentModel;
+import com.hcc.models.UserModel;
+
+import java.time.format.DateTimeFormatter;
 
 public class Converter {
+    public static AssignmentResponseDto toAssignmentResponseDto(Assignment assignment) {
+        return AssignmentResponseDto.builder()
+                .assignmentId(assignment.getId())
+                //.assignmentName(assignment.)
+                .branch(assignment.getBranch().orElse(null))
+                .createdAt(DateTimeFormatter.ISO_DATE_TIME.format(assignment.getCreatedAt()))
+                .githubUrl(assignment.getGithubUrl().orElse(null))
+                .reviewVideoUrl(assignment.getReviewVideoUrl().orElse(null))
+                .status(assignment.getStatus().name())
+                .reviewedAt(assignment.getReviewedAt().orElse(null).toString())
+                .assignmentNumber(assignment.getAssignmentNumber())
+                .build();
+    }
 
-    public static AssignmentDto toAssignmentDto(Assignment assignment) {
-        return null;
-    }
-    public static UserDto toUserDto(User user) {
+
+    public static UserModel toUserModel(User user) {
         return null;
     }
 
-    public static Assignment toAssignment(AssignmentDto assignmentDto) {
-        return null;
-    }
-    public static User toUser(UserDto userDto) {
+
+    public static User toUser(UserModel userModel) {
         return null;
     }
 }

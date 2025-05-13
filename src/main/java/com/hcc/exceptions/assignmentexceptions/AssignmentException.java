@@ -1,6 +1,12 @@
-package com.hcc.exceptions;
+package com.hcc.exceptions.assignmentexceptions;
 
 public class AssignmentException extends RuntimeException{
 
-    public 
+    public AssignmentException(String message) {
+        super(message);
+    }
+
+    public AssignmentException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

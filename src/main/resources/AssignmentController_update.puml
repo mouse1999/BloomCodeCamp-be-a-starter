@@ -10,7 +10,7 @@ autonumber
 
 User -> Frontend : 1. Clicks "Update Assignment {assign_id}"
 Frontend -> Frontend : 2. Attaches JWT to Header
-Frontend -> Controller : 3. PUT /api/assignments/assign_id
+Frontend -> Controller : 3. PUT /api/assignments/assign_id\n{updateAssignmentRequestDto}
 
 Controller -> AuthFilter : 4. Intercepts request
 activate AuthFilter
@@ -33,9 +33,10 @@ alt 11. Not Owner
 else 11. Owner
     Service --> Service : create assignment from the request
     Service --> Repository : save(new assignment)
-    Service --> Controller : 12. AssignmentDTO
+    Service --> Controller : 12. AssignmentModel
+
     deactivate Service
-    Controller --> Frontend : 13. 200 OK + DTO
+    Controller --> Frontend : 13. 200 OK + updateAssignmentResponseDto
 end
 
 Frontend -> User : 14. Shows edit form or error

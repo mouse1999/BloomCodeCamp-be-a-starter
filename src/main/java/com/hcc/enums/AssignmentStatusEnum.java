@@ -2,6 +2,9 @@ package com.hcc.enums;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hcc.exceptions.assignmentexceptions.InvalidAssignmentStatusException;
+
+import java.util.Arrays;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum AssignmentStatusEnum {
@@ -25,5 +28,12 @@ public enum AssignmentStatusEnum {
 
     public Integer getStep() {
         return step;
+    }
+
+    public static AssignmentStatusEnum fromStatusStep(Integer step) {
+        return Arrays.stream(values())
+                .filter((e)-> e.getStep().equals(step))
+                .findFirst()
+                .orElseThrow(() -> new InvalidAssignmentStatusException("This Status Step does not Exist"));
     }
 }
