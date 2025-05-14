@@ -158,7 +158,22 @@ public class AssignmentService implements AssignmentServiceInterface<Assignment>
     }
     @Override
     public Assignment startReview(Long assignmentId, Long reviewerId) {
-        return null;
+
+        Assignment assignment = this.getAssignmentById(assignmentId);
+
+        User reviewer = userRepository.findById(reviewerId).orElseThrow(()->new UserNotFoundException(""));
+
+         return Optional.of(assignment)
+                        .filter((a)-> a.getStatus().getStep().equals(2) && a.getStatus() != null)
+                                .map((a) -> {
+                                    a.setStatus(AssignmentStatusEnum.IN_REVIEW);
+                                    a.setCodeReviewer(reviewer);
+                                    return assignmentRepository.save(a);
+                                })
+                .orElseThrow(()-> assignment.getStatus() == null ?
+                        new InvalidAssignmentStatusException("A save assignment cannot have null status"):
+                        new StatusChangeException("This assignment is already reviewed "));
+
     }
 
     @Override

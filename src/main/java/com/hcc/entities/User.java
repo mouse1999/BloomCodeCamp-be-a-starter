@@ -1,7 +1,10 @@
 package com.hcc.entities;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 
 @Entity
@@ -20,14 +23,17 @@ public class User {
     @Column(name = "password", nullable = false, updatable = false)
     private final String password;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private final List<Authority> authorities;
 
-    // Private constructor - only the Builder can create instances
+
     private User(Builder builder) {
         this.id = null;
         this.cohortStartDate = builder.cohortStartDate;
         this.userName = builder.userName;
         this.password = builder.password;
 
+        authorities = builder.authorities;
     }
     // JPA requires a no-args constructor (protected)
     protected User() {
@@ -35,7 +41,7 @@ public class User {
         this.cohortStartDate = null;
         this.userName = null;
         this.password = null;
-
+        authorities = null;
     }
 
     // Getters
@@ -43,6 +49,10 @@ public class User {
     public Date getCohortStartDate() { return cohortStartDate; }
     public String getUserName() { return userName; }
     public String getPassword() { return password; }
+
+    public List<Authority> getAuthorities() {
+        return new ArrayList<>(Objects.requireNonNull(authorities));
+    }
 
     // Static builder method
     public static Builder builder() {
@@ -55,6 +65,7 @@ public class User {
         private Date cohortStartDate;
         private String userName;
         private String password;
+        private List<Authority> authorities;
 
 
         private Builder() {}
@@ -73,11 +84,16 @@ public class User {
             this.password = password;
             return this;
         }
+        public Builder authorities(List<Authority> authorities) {
+            this.authorities = new ArrayList<>(authorities);
+            return this;
+        }
 
 
         public User build() {
             // Validate required fields
             if (userName == null || password == null) {
+                //TODO
                 throw new IllegalStateException("Username and password are required"); // i will have to create a custom Exception
             }
 

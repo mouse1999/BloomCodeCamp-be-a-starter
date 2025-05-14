@@ -39,11 +39,16 @@ public class Assignment {
 
     private Instant reviewedAt;  // Nullable until review
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private final AssignmentEnum assignmentEnum ;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private final User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reviewer_id")
     private User codeReviewer;
 
     // JPA-required constructor

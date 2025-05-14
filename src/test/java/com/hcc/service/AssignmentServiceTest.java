@@ -16,6 +16,8 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.Instant;
 import java.util.Date;
@@ -463,6 +465,75 @@ public class AssignmentServiceTest {
             assignmentService.submitAssignment(1L, emptyBranch, "https://valid.url", userId);
         });
         verify(assignmentRepository, never()).save(any());
+    }
+
+
+    @Test
+    @WithMockUser(password = "1234", username = "reviewer1", roles = "REVIEWER")
+    void startReview_validAssignmentAndAuthenticatedReviewer_returnsUpdatedAssignment() {
+        // Given
+        Long assignmentId = 1L;
+        Long reviewerId = 100L;
+        Assignment assignment = Assignment.builder()
+                .status(AssignmentStatusEnum.SUBMITTED)
+                .build();
+
+        when(assignmentRepository.findById(assignmentId))
+                .thenReturn(Optional.of(assignment));
+
+        when(userRepository.findById(reviewerId)).thenReturn(Optional.of(User.builder().userName("reviewer").password("123").build()));
+
+        //when(any(assignment.getClass()).getStatus()). thenReturn(AssignmentStatusEnum.SUBMITTED);
+
+        when(assignmentRepository.save(assignment)).then(inv -> inv.getArgument(0));
+
+        // When
+        Assignment result = assignmentService.startReview(assignmentId, reviewerId);
+
+        // Then
+        assertEquals(AssignmentStatusEnum.IN_REVIEW, result.getStatus());
+        assertNotNull(result.getCodeReviewer().get(),"reviewer must not be null");
+        verify(assignmentRepository).save(assignment);
+        verify(assignmentRepository, times(1)).findById(assignmentId);
+    }
+
+    @Test
+    void startReview_invalidAssignmentId_throwsAssignmentNotFoundException() {
+        when(assignmentRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(AssignmentNotFoundException.class,
+                () -> assignmentService.startReview(999L, 100L));
+    }
+
+    @Test
+    void startReview_alreadyReviewedAssignment_throwsStatusChangeException() {
+
+        Long reviewerId = 123L;
+        Long assignmentId = 1L;
+        Assignment inReviewAssignment = Assignment.builder()
+                .status(AssignmentStatusEnum.IN_REVIEW)
+                .build();
+        when(userRepository.findById(reviewerId)).thenReturn(Optional.of(User.builder().userName("reviewer").password("123").build()));
+
+        when(assignmentRepository.findById(assignmentId))
+                .thenReturn(Optional.of(inReviewAssignment));
+
+        assertThrows(StatusChangeException.class,
+                () -> assignmentService.startReview(assignmentId, reviewerId));
+    }
+
+
+    @Test
+    @WithMockUser(username = "unauthorized", roles = "LEARNER")
+    void startReview_unauthorizedUser_throwsAccessDenied() {
+        // Given
+        Long assignmentId = 1L;
+        Long reviewerId = 100L;
+        when(assignmentRepository.findById(assignmentId)).thenReturn(Optional.of(new Assignment()));
+        when(userRepository.findById(reviewerId)).thenReturn(Optional.of(User.builder().userName("learner1").password("123").build())); // User exists
+
+        // When & Then
+        assertThrows(AccessDeniedException.class, () -> assignmentService.startReview(assignmentId, reviewerId));
     }
 
 

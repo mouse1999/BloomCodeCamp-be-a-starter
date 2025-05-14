@@ -14,6 +14,8 @@ public class Authority {
     @Column(nullable = false, unique = true)
     private final String authority;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private final User user;
 
     // Required by JPA (protected to prevent direct instantiation)
