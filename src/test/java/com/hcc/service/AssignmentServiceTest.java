@@ -3,7 +3,7 @@ package com.hcc.service;
 import com.hcc.entities.Assignment;
 import com.hcc.entities.User;
 import com.hcc.enums.AssignmentStatusEnum;
-import com.hcc.exceptions.UsernameNotFoundException;
+import com.hcc.exceptions.UserNotFoundException;
 import com.hcc.exceptions.assignmentexceptions.*;
 import com.hcc.exceptions.userexceptions.InvalidUserAttributeException;
 import com.hcc.repositories.AssignmentRepository;
@@ -125,7 +125,7 @@ public class AssignmentServiceTest {
 
         //WHEN & THEN
         when(userRepository.findById(wrongUserId)).thenReturn(Optional.empty());
-        assertThrows(UsernameNotFoundException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             assignmentService.createAssignment(assignmentNumber, wrongUserId);
         });
 
@@ -368,5 +368,103 @@ public class AssignmentServiceTest {
         });
         verify(assignmentRepository, never()).findAllByStatus(any());
     }
+
+    @Test
+    void submitAssignment_validInput_returnsAssignment() {
+        // Given
+        Integer assignmentNumber = 1;
+        String branchName = "main";
+        String githubUrl = "https://github.com/user/repo";
+        Long userId = 123L;
+        Long assignmentId = 234L;
+
+        User mockUser = User.builder()
+                .userName("edward")
+                .password("user123")
+                .build();
+
+        Assignment expectedAssignment = Assignment.builder()
+                .assignmentNumber(assignmentNumber)
+                .branch(branchName)
+                .githubUrl(githubUrl)
+                .user(mockUser)
+                .status(AssignmentStatusEnum.SUBMITTED)
+                .build();
+
+        when(userRepository.existsById(userId)).thenReturn(true);
+        when(assignmentRepository.findById(assignmentId)).thenReturn(Optional.of(expectedAssignment));
+
+        when(assignmentRepository.save(any(Assignment.class))).thenReturn(expectedAssignment);
+
+        // When
+        Assignment result = assignmentService.submitAssignment(assignmentId, branchName, githubUrl, userId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(assignmentNumber, result.getAssignmentNumber(),"assignment Id must match");
+        assertEquals(branchName, result.getBranch().get(),"branch name must match");
+        assertEquals(githubUrl, result.getGithubUrl().get(),"githuburl must match");
+        assertEquals(AssignmentStatusEnum.SUBMITTED, result.getStatus());
+        verify(assignmentRepository, times(1)).save(any());
+    }
+
+    @Test
+    void submitAssignment_invalidAssignmentId_throwsInvalidAssignmentIdException() {
+        // Given
+        Long invalidAssignmentId = null; // or null
+        String branchName = "main";
+        String githubUrl = "https://github.com/user/repo";
+        Long userId = 123L;
+
+        // When/Then
+        assertThrows(InvalidAssignmentIdException.class, () -> {
+            assignmentService.submitAssignment(invalidAssignmentId, branchName, githubUrl, userId);
+        });
+        verify(assignmentRepository, never()).save(any());
+    }
+
+    @Test
+    void submitAssignment_nonexistentUser_throwsException() {
+        // Given
+        Long invalidUserId = 999L;
+        String githubUrl = "https://github.com/user/repo";
+        when(userRepository.existsById(invalidUserId)).thenReturn(false);
+
+        // When/Then
+        assertThrows(UserNotFoundException.class, () -> {
+            assignmentService.submitAssignment(3L, "main", githubUrl, invalidUserId);
+        });
+        verify(assignmentRepository, never()).save(any());
+    }
+
+    @Test
+    void submitAssignment_invalidGithubUrl_throwsInvalidGithubUrlException() {
+        // Given
+        String invalidUrl = "not-a-url";
+        Long userId = 123L;
+
+        // When/Then
+        when(userRepository.existsById(userId)).thenReturn(true);
+        assertThrows(InvalidGithubUrlException.class, () -> {
+            assignmentService.submitAssignment(1L, "main", invalidUrl, 123L);
+        });
+        verify(assignmentRepository, never()).save(any());
+    }
+
+    @Test
+    void submitAssignment_emptyBranchName_throwsInvalidBranchNameException() {
+        // Given
+        String emptyBranch = "";
+        Long userId = 123L;
+
+        // When/Then
+        when(userRepository.existsById(userId)).thenReturn(true);
+        assertThrows(InvalidBranchNameException.class, () -> {
+            assignmentService.submitAssignment(1L, emptyBranch, "https://valid.url", userId);
+        });
+        verify(assignmentRepository, never()).save(any());
+    }
+
+
 
 }

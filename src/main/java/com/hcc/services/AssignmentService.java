@@ -4,7 +4,7 @@ import com.hcc.entities.Assignment;
 import com.hcc.entities.User;
 import com.hcc.enums.AssignmentEnum;
 import com.hcc.enums.AssignmentStatusEnum;
-import com.hcc.exceptions.UsernameNotFoundException;
+import com.hcc.exceptions.UserNotFoundException;
 import com.hcc.exceptions.assignmentexceptions.*;
 import com.hcc.exceptions.userexceptions.InvalidUserAttributeException;
 import com.hcc.interfaces.AssignmentServiceInterface;
@@ -15,12 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.naming.directory.InvalidAttributeValueException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -48,7 +45,7 @@ public class AssignmentService implements AssignmentServiceInterface<Assignment>
         User user = userRepository.findById(creatorId)
                 .orElseThrow(() -> {
                     logger.error("User id {} not valid", creatorId);
-                    return new UsernameNotFoundException("User not found with id: " + creatorId);
+                    return new UserNotFoundException("User not found with id: " + creatorId);
                 });
 
 
@@ -117,7 +114,7 @@ public class AssignmentService implements AssignmentServiceInterface<Assignment>
                 .orElseThrow(() ->
                         userId == null
                         ? new InvalidUserAttributeException("User ID cannot be null")
-                        : new UsernameNotFoundException("User not found for this Id " + userId));
+                        : new UserNotFoundException("User not found for this Id " + userId));
     }
 
     @Override
@@ -132,10 +129,33 @@ public class AssignmentService implements AssignmentServiceInterface<Assignment>
     }
 
     @Override
-    public Assignment submitAssignment(Long assignmentId, String branchName, String githubUrl, String studentId) {
-        return null;
-    }
+    public Assignment submitAssignment(Long assignmentId, String branchName, String githubUrl, Long userId) {
 
+        Optional.ofNullable(assignmentId)
+                .orElseThrow(() -> new InvalidAssignmentIdException("Assignment ID cannot be null"));
+
+        Optional.ofNullable(userId)
+                .filter(userRepository::existsById)
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+
+        Optional.ofNullable(branchName)
+                .filter(name -> !name.isEmpty())
+                .orElseThrow(() -> new InvalidBranchNameException("Branch name cannot be empty"));
+
+        Optional.ofNullable(githubUrl)
+                .filter(url -> url.matches("^(https?://)?(www\\.)?github\\.com/.+"))
+                .orElseThrow(() -> new InvalidGithubUrlException("Invalid GitHub URL: " + githubUrl));
+
+
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new AssignmentNotFoundException("Assignment not found with ID: " + assignmentId));
+
+        assignment.setBranch(branchName);
+        assignment.setGithubUrl(githubUrl);
+        assignment.setStatus(AssignmentStatusEnum.SUBMITTED);
+
+        return assignmentRepository.save(assignment);
+    }
     @Override
     public Assignment startReview(Long assignmentId, Long reviewerId) {
         return null;

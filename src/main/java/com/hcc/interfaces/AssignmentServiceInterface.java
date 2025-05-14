@@ -21,7 +21,7 @@ public interface AssignmentServiceInterface<T> {
 
     //status management
 
-    T submitAssignment(Long assignmentId, String branchName, String githubUrl, String studentId);
+    T submitAssignment(Long assignmentId, String branchName, String githubUrl, Long userId);
     T startReview(Long assignmentId, Long reviewerId); //when this is called by any reviewer, the queued assignment is removed from the list and handled specifically by the reviewer
     T completeReview(Long assignmentId, String reviewVideoUrl, String reviewerId);
     T requestResubmission(Long assignmentId, String feedback, String reviewerId);

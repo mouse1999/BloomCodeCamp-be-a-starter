@@ -13,10 +13,10 @@ package com.hcc.services;
 //     UserRepository userRepo;
 //
 //    @Override
-//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//    public UserDetails loadUserByUsername(String username) throws UserNotFoundException {
 //        Optional<User> userOpt = userRepo.findByUsername(username);
 //        user.setUsername(username);
 //        user.setPassword(passwordEncoder.getPasswordEncoder().encode("asdfasdf"));
-//        return userOpt.orElseThrow(() -> new UsernameNotFoundException("Invalid Credentials"));
+//        return userOpt.orElseThrow(() -> new UserNotFoundException("Invalid Credentials"));
 //    }
 //}
