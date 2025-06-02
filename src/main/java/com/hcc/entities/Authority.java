@@ -1,42 +1,40 @@
 package com.hcc.entities;
 
+import org.springframework.security.core.GrantedAuthority;
+
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "authoritiesTable")
-public class Authority {
+@Table(name = "authorities")
+public class Authority implements GrantedAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private final Long id;
+    private Long id;
 
     @Column(nullable = false, unique = true)
-    private final String authority;
+    private String authority;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private final User user;
+    private User user;
 
-    // Required by JPA (protected to prevent direct instantiation)
     protected Authority() {
-        this.id = null;
-        this.authority = null;
-        this.user = null;
+
     }
 
-    // Private constructor used by builder
+
     private Authority(Builder builder) {
-        this.id = null;
         this.authority = builder.authority;
         this.user = builder.user;
     }
 
-    // Getters (no setters for immutability)
     public Long getId() {
         return id;
     }
 
+    @Override
     public String getAuthority() {
         return authority;
     }
@@ -45,18 +43,25 @@ public class Authority {
         return user;
     }
 
-    // equals() and hashCode()
+    public void setAuthority(String authority) { this.authority = authority; }
+    public void setUser(User user) { this.user = user; }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Authority authority = (Authority) o;
-        return Objects.equals(id, authority.id);
+        Authority that = (Authority) o;
+
+        if (id == null) {
+            return false;
+        }
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return id == null ? 31 : Objects.hash(id);
     }
 
     @Override
@@ -64,10 +69,9 @@ public class Authority {
         return "Authority{" +
                 "id=" + id +
                 ", authority='" + authority + '\'' +
-                '}'; // Exclude user to avoid circular references
+                '}';
     }
 
-    // Builder pattern implementation
     public static Builder builder() {
         return new Builder();
     }
@@ -89,6 +93,12 @@ public class Authority {
         }
 
         public Authority build() {
+            if (this.authority == null || this.authority.trim().isEmpty()) {
+                throw new IllegalStateException("Authority string cannot be null or empty.");
+            }
+            if (this.user == null) {
+                throw new IllegalStateException("User cannot be null for an Authority.");
+            }
             return new Authority(this);
         }
     }
