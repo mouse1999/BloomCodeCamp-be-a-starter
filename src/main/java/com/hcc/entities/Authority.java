@@ -1,8 +1,10 @@
 package com.hcc.entities;
 
+import com.hcc.enums.AuthorityEnum;
+import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 
-import javax.persistence.*;
+
 import java.util.Objects;
 
 @Entity
@@ -14,7 +16,8 @@ public class Authority implements GrantedAuthority {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String authority;
+    @Enumerated(EnumType.STRING)
+    private AuthorityEnum authority;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -36,14 +39,14 @@ public class Authority implements GrantedAuthority {
 
     @Override
     public String getAuthority() {
-        return authority;
+        return authority.name();
     }
 
     public User getUser() {
         return user;
     }
 
-    public void setAuthority(String authority) { this.authority = authority; }
+    public void setAuthority(AuthorityEnum authority) { this.authority = authority; }
     public void setUser(User user) { this.user = user; }
 
 
@@ -77,12 +80,12 @@ public class Authority implements GrantedAuthority {
     }
 
     public static final class Builder {
-        private String authority;
+        private AuthorityEnum authority;
         private User user;
 
         private Builder() {}
 
-        public Builder authority(String authority) {
+        public Builder authority(AuthorityEnum authority) {
             this.authority = authority;
             return this;
         }
@@ -93,7 +96,7 @@ public class Authority implements GrantedAuthority {
         }
 
         public Authority build() {
-            if (this.authority == null || this.authority.trim().isEmpty()) {
+            if (this.authority == null ) {
                 throw new IllegalStateException("Authority string cannot be null or empty.");
             }
             if (this.user == null) {

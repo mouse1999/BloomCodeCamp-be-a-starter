@@ -3,11 +3,14 @@ package com.hcc.converter;
 
 import com.hcc.dtos.response.assignmentdto.AssignmentResponseDto;
 import com.hcc.entities.Assignment;
+import com.hcc.entities.Authority;
 import com.hcc.entities.User;
 import com.hcc.models.AssignmentModel;
 import com.hcc.models.UserModel;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 public class Converter {
     public static AssignmentResponseDto toAssignmentResponseDto(Assignment assignment) {
@@ -26,9 +29,15 @@ public class Converter {
 
 
     public static UserModel toUserModel(User user) {
-        return null;
-    }
 
+        return UserModel.builder()
+                .userName(user.getUserName())
+                .authorities(user.getAuthorities().stream().map(item -> (GrantedAuthority) item)
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList()))
+                .cohortStartDate(user.getCohortStartDate())
+                .build();
+    }
 
     public static User toUser(UserModel userModel) {
         return null;

@@ -2,14 +2,13 @@ package com.hcc.entities;
 
 import com.hcc.enums.AssignmentEnum;
 import com.hcc.enums.AssignmentStatusEnum;
+import jakarta.persistence.*;
 
-import javax.persistence.*;
+
 import java.util.Objects;
 
-import javax.persistence.*;
+
 import java.time.Instant;
-import java.util.Objects;
-import java.util.Optional;
 
 @Entity
 @Table(name = "assignments_table")
@@ -207,5 +206,4 @@ public class Assignment {
                 ", codeReviewer=" + (codeReviewer != null ? codeReviewer.getId() : "null") +
                 '}';
     }
-}
 }
