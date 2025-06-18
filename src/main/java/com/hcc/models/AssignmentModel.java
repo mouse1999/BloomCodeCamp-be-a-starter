@@ -1,136 +1,108 @@
 package com.hcc.models;
 
-
-import com.hcc.entities.User;
-import com.hcc.enums.AssignmentStatusEnum;
-
-import javax.persistence.*;
-import java.time.Instant;
 import java.util.Objects;
-import java.util.Optional;
 
 public class AssignmentModel {
 
 
-    private final Instant createdAt;  // Auto-set on creation
-
-    private AssignmentStatusEnum status;
-
-    private final Integer assignmentNumber;  // Required
-
+    private Long id;
+    private String createdAt;
+    private String status;
+    private Integer assignmentNumber;
     private String githubUrl;
 
-    private String branch;
+    private String branch; // Default to nullable in DB
 
     private String reviewVideoUrl;
 
-    private Instant reviewedAt;  // Nullable until review
+    private String reviewedAt; // Nullable until review
 
-    private final User user;
+    private String assignmentType;
+    private String learnerName;
 
-    private User codeReviewer;
+    private String codeReviewerName;
 
-    // JPA-required constructor
+    // JPA-required no-arg constructor
+
     public AssignmentModel() {
-
-        assignmentNumber = null;
-        createdAt = null;
-        user = null;
     }
 
-    // Builder constructor
     private AssignmentModel(Builder builder) {
-
         this.status = builder.status;
+        this.id = builder.id;
         this.assignmentNumber = builder.assignmentNumber;
         this.githubUrl = builder.githubUrl;
         this.branch = builder.branch;
         this.reviewVideoUrl = builder.reviewVideoUrl;
-        this.user = builder.user;
-        this.codeReviewer = builder.codeReviewer;
-        this.createdAt = null;
+        this.learnerName = builder.learnerName;
+        this.codeReviewerName = builder.codeReviewerName;
+        this.assignmentType = builder.assignmentType;
+        this.createdAt = builder.createdAt;
+        this.reviewedAt = builder.reviewedAt;
     }
 
 
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public AssignmentStatusEnum getStatus() {
-        return status;
-    }
-
-    public Integer getAssignmentNumber() {
-        return assignmentNumber;
-    }
-
-    public Optional<String> getGithubUrl() {
-        return Optional.ofNullable(githubUrl);
-    }
-
-    public Optional<String> getBranch() {
-        return Optional.of(branch);
-    }
-
-    public Optional<String> getReviewVideoUrl() {
-        return Optional.ofNullable(reviewVideoUrl);
-    }
-
-    public Optional<Instant> getReviewedAt() {
-        return Optional.ofNullable(reviewedAt);
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public Optional<User> getCodeReviewer() {
-        return Optional.ofNullable(codeReviewer);
-    }
+    public Long getId() { return id; }
+    public String getCreatedAt() { return createdAt; }
+    public String getStatus() { return status; }
+    public String getAssignmentType() { return assignmentType; }
+    public Integer getAssignmentNumber() { return assignmentNumber; }
+    public String getGithubUrl() { return githubUrl; }
+    public String getBranch() { return branch; }
+    public String getReviewVideoUrl() { return reviewVideoUrl; }
+    public String getReviewedAt() { return reviewedAt; }
+    public String getLearnerName() { return learnerName; }
+    public String getCodeReviewerName() { return codeReviewerName; }
 
 
-    public void setStatus(AssignmentStatusEnum status) {
-        this.status = status;
-    }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public void setStatus(String status) { this.status = status; }
+    public void setAssignmentNumber(Integer assignmentNumber) { this.assignmentNumber = Objects.requireNonNull(assignmentNumber); }
+    public void setGithubUrl(String githubUrl) { this.githubUrl = githubUrl; }
+    public void setBranch(String branch) { this.branch = branch; }
+    public void setReviewVideoUrl(String reviewVideoUrl) { this.reviewVideoUrl = reviewVideoUrl; }
+    public void setReviewedAt(String reviewedAt) { this.reviewedAt = reviewedAt; }
+    public void setLearnerName(String learnerName) { this.learnerName = learnerName; }
+    public void setCodeReviewerName(String codeReviewer) { this.codeReviewerName = codeReviewerName; }
+    public void setAssignmentType(String assignmentType) { this.assignmentType = assignmentType; } // Renamed setter
 
-    public void setGithubUrl(String githubUrl) {
-        this.githubUrl = githubUrl;
-    }
 
-    public void setBranch(String branch) {
-        this.branch = branch;
-    }
-
-    public void setReviewDetails(String videoUrl, Instant reviewedAt) {
-        this.reviewVideoUrl = videoUrl;
-        this.reviewedAt = reviewedAt;
-    }
-
-    public void setCodeReviewer(User codeReviewer) {
-        this.codeReviewer = codeReviewer;
-    }
 
     public static Builder builder() {
         return new Builder();
     }
 
     public static final class Builder {
-        private AssignmentStatusEnum status;
+        private Long id;
+        private String status;
+        private String assignmentType; // Renamed
         private Integer assignmentNumber;
         private String githubUrl;
         private String branch;
         private String reviewVideoUrl;
-        private User user;
-        private User codeReviewer;
+        private String learnerName;
+        private String codeReviewerName;
+        private String createdAt;
+        private String reviewedAt;
 
-        public Builder status(AssignmentStatusEnum status) {
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+
+        public Builder status(String status) {
             this.status = status;
             return this;
         }
 
+        public Builder assignmentType(String assignmentType) { // Renamed method
+            this.assignmentType = assignmentType;
+            return this;
+        }
+
         public Builder assignmentNumber(Integer assignmentNumber) {
-            this.assignmentNumber = (assignmentNumber);
+            this.assignmentNumber = assignmentNumber;
             return this;
         }
 
@@ -149,17 +121,26 @@ public class AssignmentModel {
             return this;
         }
 
-        public Builder user(User user) {
-            this.user = user;
+        public Builder learner(String userName) {
+            this.learnerName = userName;
             return this;
         }
 
-        public Builder codeReviewer(User codeReviewer) {
-            this.codeReviewer = codeReviewer;
+        public Builder codeReviewer(String codeReviewerName) {
+            this.codeReviewerName = codeReviewerName;
+            return this;
+        }
+        public Builder createdAt(String createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+        public Builder reviewedAt(String reviewedAt) {
+            this.reviewedAt = reviewedAt;
             return this;
         }
 
         public AssignmentModel build() {
+
             return new AssignmentModel(this);
         }
     }

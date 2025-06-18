@@ -38,7 +38,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.config.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -123,10 +123,10 @@ package com.hcc.filters;
 import com.hcc.repositories.UserRepository;
 import com.hcc.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.config.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.config.core.context.SecurityContextHolder;
+import org.springframework.config.core.userdetails.UserDetails;
+import org.springframework.config.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -197,13 +197,13 @@ import com.hcc.services.UserDetailServiceImpl;
 import com.hcc.utils.CustomPasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.config.authentication.AuthenticationManager;
+import org.springframework.config.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.config.config.annotation.web.builders.HttpSecurity;
+import org.springframework.config.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.config.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.config.config.http.SessionCreationPolicy;
+import org.springframework.config.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -275,10 +275,10 @@ import com.hcc.entities.User;
 import com.hcc.repositories.UserRepository;
 import com.hcc.utils.CustomPasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-//import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.config.core.userdetails.UserDetails;
+import org.springframework.config.core.userdetails.UserDetailsService;
+import org.springframework.config.core.userdetails.UsernameNotFoundException;
+//import org.springframework.config.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -305,7 +305,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
 ```properties   
 jwt.secret = wigfjwriofgjweriogfj34itj349t8gerug8934yhtgiuoerhgjeuiofbhjertjklgjIOUJIOUJHUIOYH3453543564FHGFfg
 
-spring.security.filter.order=10
+spring.config.filter.order=10
 ```
 
 # Guidance

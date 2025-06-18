@@ -68,7 +68,7 @@ Your job is to begin work on the LMS by setting up the domain objects shown abov
 
 ### Add Spring Security and create a Security Config
 
-#### Uncomment the spring security dependencies inside the build.gradle file
+#### Uncomment the spring config dependencies inside the build.gradle file
 
 #### Uncomment the CustomPasswordEncoder and the UserDetailsServiceImpl
 
@@ -79,10 +79,10 @@ package com.hcc.services;
 import com.hcc.entities.User;
 import com.hcc.utils.CustomPasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.config.core.userdetails.UserDetails;
+import org.springframework.config.core.userdetails.UserDetailsService;
+import org.springframework.config.core.userdetails.UsernameNotFoundException;
+import org.springframework.config.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -109,10 +109,10 @@ import com.hcc.services.UserDetailServiceImpl;
 import com.hcc.utils.CustomPasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.config.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.config.config.annotation.web.builders.HttpSecurity;
+import org.springframework.config.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.config.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 @EnableWebSecurity
 public class SecurityConfig  extends WebSecurityConfigurerAdapter {

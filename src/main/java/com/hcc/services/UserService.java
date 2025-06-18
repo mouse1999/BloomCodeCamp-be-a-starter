@@ -13,6 +13,7 @@ import com.hcc.repositories.AuthorityRepository;
 import com.hcc.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -21,26 +22,22 @@ import java.util.stream.Collectors;
 @Transactional
 public class UserService {
     @Autowired
-    private final UserRepository userRepository;
+    private  UserRepository userRepository;
     @Autowired
-    private final AuthorityRepository authorityRepository;
+    private  AuthorityRepository authorityRepository;
+    @Autowired
+    private  PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository,
-                       AuthorityRepository authorityRepository) {
-        this.userRepository = userRepository;
-        this.authorityRepository = authorityRepository;
-
-    }
 
     public UserModel registerUser(SignUpRequest request) {
 
-        if (userRepository.existByUserName(request.getUserName())) {
+        if (userRepository.existsByUserName(request.getUserName())) {
             throw new UserAlreadyExistsException("Username already exists");
         }
 
         User user = User.builder()
                 .userName(request.getUserName())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
         userRepository.save(user);
@@ -64,7 +61,7 @@ public class UserService {
                 .build();
 
         authorityRepository.save(authority);
-        return Converter.toUserModel(user);
+        return Converter.toUserModel(userRepository.findByUserName(request.getUserName()).orElse(user));
     }
 
     public UserModel getUserByUserName(String username) {
@@ -75,7 +72,7 @@ public class UserService {
     }
 
     public boolean userExists(String username) {
-        return userRepository.existByUserName(username);
+        return userRepository.existsByUserName(username);
     }
 
 

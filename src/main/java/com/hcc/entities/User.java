@@ -27,7 +27,7 @@ public class User implements UserDetails {
     private String password;
 
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Authority> authorities;
 
     protected User() {
@@ -46,7 +46,6 @@ public class User implements UserDetails {
 
     public Long getId() { return id; }
     public Instant getCohortStartDate() { return cohortStartDate; }
-    public String getUserName() { return userName; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -63,7 +62,6 @@ public class User implements UserDetails {
 
     public void setCohortStartDate(Instant cohortStartDate) { this.cohortStartDate = cohortStartDate; }
     public void setUserName(String userName) { this.userName = userName; }
-    public void setPassword(String password) { this.password = password; }
     public void setAuthorities(List<Authority> authorities) {
         this.authorities.clear();
         if (authorities != null) {

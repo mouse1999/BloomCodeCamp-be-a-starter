@@ -1,5 +1,7 @@
 package com.hcc.exceptions;
 
+import com.hcc.exceptions.assignmentexceptions.InvalidAssignmentNumberException;
+import com.hcc.exceptions.userexceptions.UserAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -42,7 +44,36 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+//InvalidAssignmentNumberException
+@ExceptionHandler(InvalidAssignmentNumberException.class)
+public ResponseEntity handleInvalidAssignmentNumberException(
+        UserNotFoundException ex, WebRequest request) {
+    logger.error("Invalid Number: {}", ex.getMessage());
 
+    ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.BAD_REQUEST.value(),
+            ex.getMessage(),
+            request.getDescription(false),
+            new Date() );
+
+
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+}
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity handleUserAlreadyExistsException(
+            UserAlreadyExistsException ex, WebRequest request) {
+        logger.error("User already exist: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                request.getDescription(false),
+                new Date() );
+
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
 
 }

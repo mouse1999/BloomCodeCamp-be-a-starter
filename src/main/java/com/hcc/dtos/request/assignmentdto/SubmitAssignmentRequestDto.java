@@ -1,48 +1,31 @@
 package com.hcc.dtos.request.assignmentdto;
 
-import javax.validation.constraints.*;
 
-public class SubmitAssignmentRequestDto {
-    @NotBlank(message = "GitHub URL is required")
-    @Pattern(
-            regexp = "^(https?://)?(www\\.)?github\\.com/.+",
-            message = "Must be a valid GitHub URL"
-    )
-    private final String githubUrl;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
-    @NotBlank(message = "Branch name is required")
-    private final String branch;
-
-    @NotNull(message = "Assignment number is required")
-    @Min(value = 1, message = "Number must be ≥ 1")
-    private final Integer assignmentNumber;
-    @NotNull(message = "user Id is required")
-    private final Long userId;
-
+public record SubmitAssignmentRequestDto(@NotBlank(message = "GitHub URL is required") @Pattern(
+        regexp = "^(https?://)?(www\\.)?github\\.com/.+",
+        message = "Must be a valid GitHub URL"
+) String githubUrl, @NotBlank(message = "Branch name is required") String branch) {
     public SubmitAssignmentRequestDto(
             String githubUrl,
-            String branch,
-            Integer assignmentNumber, Long userId
+            String branch
     ) {
         this.githubUrl = githubUrl;
         this.branch = branch;
-        this.assignmentNumber = assignmentNumber;
-        this.userId = userId;
+
     }
 
-    public String getGithubUrl() {
+    @Override
+    public String githubUrl() {
         return githubUrl;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
 
-    public String getBranch() {
+    @Override
+    public String branch() {
         return branch;
     }
 
-    public Integer getAssignmentNumber() {
-        return assignmentNumber;
-    }
 }

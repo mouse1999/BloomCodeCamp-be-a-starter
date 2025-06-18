@@ -1,6 +1,6 @@
 package com.hcc.models;
 
-;
+
 
 import java.time.Instant;
 import java.util.ArrayList;

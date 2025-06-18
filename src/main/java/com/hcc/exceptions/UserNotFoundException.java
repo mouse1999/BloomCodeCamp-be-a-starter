@@ -1,6 +1,13 @@
 package com.hcc.exceptions;
 
-public class UserNotFoundException extends RuntimeException {
-    public UserNotFoundException(String invalidCredentials) {
+import com.hcc.exceptions.userexceptions.UserException;
+
+public class UserNotFoundException extends UserException {
+    public UserNotFoundException(String message) {
+        super(message);
+    }
+
+    public UserNotFoundException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

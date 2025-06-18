@@ -6,13 +6,13 @@ import jakarta.validation.constraints.Size;
 
 public class SignUpRequest {
 
-    @NotBlank
+    @NotBlank(message = "Username is required")
     @Size(min = 4, max = 20)
     private String userName;
-    @NotBlank
+    @NotBlank(message = "Password is required")
     @Size(min = 8, max = 15)
     private String password;
-    @NotBlank
+    @NotBlank(message = "Role is required")
     private String role;
 
 

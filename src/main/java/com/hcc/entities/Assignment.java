@@ -3,6 +3,7 @@ package com.hcc.entities;
 import com.hcc.enums.AssignmentEnum;
 import com.hcc.enums.AssignmentStatusEnum;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 
 import java.util.Objects;
@@ -18,7 +19,9 @@ public class Assignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     @Column(nullable = false, updatable = false)
+    @CreationTimestamp
     private Instant createdAt;
 
     @Column(nullable = false)
@@ -36,7 +39,8 @@ public class Assignment {
     @Column(name = "review_video_url")
     private String reviewVideoUrl;
 
-    private Instant reviewedAt; // Nullable until review
+    private Instant reviewedAt; // Nullable unt
+    // il review
 
     @Enumerated(EnumType.STRING)
     @Column(name = "assignment_type")
@@ -67,6 +71,7 @@ public class Assignment {
         this.user = builder.user;
         this.codeReviewer = builder.codeReviewer;
         this.assignmentType = builder.assignmentType;
+        this.createdAt = builder.createdAt;
     }
 
 
@@ -112,6 +117,7 @@ public class Assignment {
         private String githubUrl;
         private String branch;
         private String reviewVideoUrl;
+        private Instant createdAt;
         private User user;
         private User codeReviewer;
 
@@ -130,7 +136,7 @@ public class Assignment {
         }
 
         public Builder assignmentNumber(Integer assignmentNumber) {
-            this.assignmentNumber = Objects.requireNonNull(assignmentNumber, "Assignment number cannot be null");
+            this.assignmentNumber = assignmentNumber;
             return this;
         }
 
@@ -156,6 +162,11 @@ public class Assignment {
 
         public Builder codeReviewer(User codeReviewer) {
             this.codeReviewer = codeReviewer;
+            return this;
+        }
+
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
             return this;
         }
 

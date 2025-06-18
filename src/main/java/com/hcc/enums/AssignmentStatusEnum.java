@@ -30,6 +30,13 @@ public enum AssignmentStatusEnum {
         return step;
     }
 
+    public static AssignmentStatusEnum fromStatus(String status) {
+       return Arrays.stream(values())
+               .filter(e-> e.getStatus().equals(status))
+               .findFirst()
+               .orElseThrow(()-> new InvalidAssignmentStatusException("\"No enum constant with status: \" + status"));
+    }
+
     public static AssignmentStatusEnum fromStatusStep(Integer step) {
         return Arrays.stream(values())
                 .filter((e)-> e.getStep().equals(step))

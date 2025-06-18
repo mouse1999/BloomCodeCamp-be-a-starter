@@ -1,142 +1,147 @@
 package com.hcc.services;
 
+import com.hcc.converter.Converter;
 import com.hcc.entities.Assignment;
 import com.hcc.entities.User;
 import com.hcc.enums.AssignmentEnum;
 import com.hcc.enums.AssignmentStatusEnum;
-import com.hcc.exceptions.UserNotFoundException;
 import com.hcc.exceptions.assignmentexceptions.*;
-import com.hcc.exceptions.userexceptions.InvalidUserAttributeException;
-import com.hcc.interfaces.AssignmentServiceInterface;
+
+import com.hcc.models.AssignmentModel;
 import com.hcc.repositories.AssignmentRepository;
 import com.hcc.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Service
-public class AssignmentService implements AssignmentServiceInterface<Assignment> {
+public class AssignmentService  {
 
 
     @Autowired
     private final AssignmentRepository assignmentRepository;
-    private final UserRepository userRepository;
     private static final Logger logger = LoggerFactory.getLogger(AssignmentService.class);
 
-    public AssignmentService(AssignmentRepository assignmentRepository, UserRepository userRepository) {
+    public AssignmentService(AssignmentRepository assignmentRepository) {
         this.assignmentRepository = assignmentRepository;
-        this.userRepository = userRepository;
+
     }
 
 
-    @Override
-    public Assignment createAssignment(Integer assignmentNumber, Long creatorId) {
 
-        Optional.ofNullable(creatorId)
-                .orElseThrow(() -> new InvalidUserAttributeException("User ID must not be null"));
+    @Transactional // Ensures atomicity of the operation
+    public AssignmentModel createAssignment(Integer assignmentNumber, User creator) {
+
+        Long creatorId = creator.getId();
+
+        if (assignmentRepository.existsByAssignmentNumberAndUserId(assignmentNumber, creatorId)) {
+            logger.error("Assignment {} already submitted by user {}", assignmentNumber, creatorId);
+            throw new AssignmentAlreadySubmittedException(
+                    "Assignment " + assignmentNumber + " already exists for user " + creatorId
+            );
+        }
 
 
-        User user = userRepository.findById(creatorId)
-                .orElseThrow(() -> {
-                    logger.error("User id {} not valid", creatorId);
-                    return new UserNotFoundException("User not found with id: " + creatorId);
-                });
-
-
-        Optional.of(assignmentNumber)
-                .filter(num -> !assignmentRepository.existsByAssignmentNumberAndUserId(num, creatorId))
-                .orElseThrow(() -> {
-                    logger.error("Assignment already submitted by user {}", creatorId);
-                    return new AssignmentAlreadySubmittedException(
-                            "Assignment " + assignmentNumber + " already exists for user " + creatorId
-                    );
-                });
-
-        // Build and save assignment
         Assignment assignment = Assignment.builder()
                 .assignmentNumber(assignmentNumber)
-                .user(user)
-                .assignmentEnum(AssignmentEnum.fromAssignmentNumber(assignmentNumber))
+                .user(creator)
+                .assignmentType(AssignmentEnum.fromAssignmentNumber(assignmentNumber))
                 .status(AssignmentStatusEnum.PENDING_SUBMISSION)
+                .createdAt(Instant.now())
                 .build();
 
-        logger.debug("Assignment created: {}", assignment);
-        return assignmentRepository.save(assignment);
+        logger.debug("Creating assignment: {}", assignment);
+        return Converter.toAssignmentModel(assignmentRepository.save(assignment));
     }
-    @Override
-    public Assignment getAssignmentById(Long id) {
+
+    public AssignmentModel getAssignmentByIdAndUserId(Long id, Long userId) {
 
         return Optional.ofNullable(id)
-                .flatMap(assignmentRepository::findById)
+                .flatMap(assignmentId->assignmentRepository.findByIdAndUserId(assignmentId, userId))
+                .map(Converter::toAssignmentModel)
                 .orElseThrow(() -> id == null
-                ? new InvalidAssignmentIdException("") :
-                        new AssignmentNotFoundException("") );
+                ? new InvalidAssignmentIdException("assignment Id must not be null") :
+                        new AssignmentNotFoundException("Assignment with this Id is not found"));
     }
 
-    @Override
-    public List<Assignment> getAllAssignments() {
-        return  new ArrayList<>(assignmentRepository.findAll());
+    public boolean existsAssignmentByNumber(Integer number, Long userId) {
+
+        return Optional.ofNullable(number)
+                .map((n)->assignmentRepository.existsByAssignmentNumberAndUserId(n, userId) )
+                .orElseThrow(() -> number == null
+                        ? new InvalidAssignmentNumberException("This assignment number does not exist") :
+                        new AssignmentNotFoundException("This assignment is not yet") );
     }
 
-    @Override
-    public List<Assignment> getAssignmentsByUserId(Long userId) {
-        return null;
+
+
+
+    public List<AssignmentModel> getAssignmentsByStatusAndUserId(String status, Long userId) {
+
+        if (status == null || status.trim().isEmpty()) {
+            return getAssignmentsByUserId(userId);
+
+        }else {
+            return assignmentRepository.findAllByStatusAndUserId(AssignmentStatusEnum.fromStatus(status), userId)
+                    .stream()
+                    .map(Converter::toAssignmentModel)
+                    .collect(Collectors.toList());
+        }
+
     }
 
-    @Override
-    public List<Assignment> getAssignmentsByStatusAndUserId(String status, Long userId) {
-        return null;
+    public List<AssignmentModel> getAssignmentsByStatusAndReviewerId(String status, Long reviewerId) {
+        if (status == null || status.trim().isEmpty()) {
+            return assignmentRepository.findAllByCodeReviewerIdOrderByReviewedAtDesc(reviewerId).stream()
+                    .map(Converter::toAssignmentModel)
+                    .collect(Collectors.toList());
+        }else {
+            return assignmentRepository.findAllByStatusAndCodeReviewerIdOrderByReviewedAtDesc(AssignmentStatusEnum.fromStatus(status), reviewerId)
+                    .stream()
+                    .map(Converter::toAssignmentModel)
+                    .collect(Collectors.toList());
+
+        }
+
+
     }
 
-    @Override
-    public List<Assignment> getAssignmentsByStatus(String status) {
-        return null;
+    private List<AssignmentModel> getAssignmentsByUserId(Long userId) {
+        return assignmentRepository.findAllByUserIdOrderByCreatedAtDesc(userId).stream()
+                .map(Converter::toAssignmentModel)
+                .collect(Collectors.toList());
     }
 
-    @Override
-    public List<Assignment> getAssignmentsByStatusAndUserId(Integer statusStep, Long userId) {
 
-        AssignmentStatusEnum status = Optional.ofNullable(statusStep)
-                .map(AssignmentStatusEnum::fromStatusStep)
-                .orElseThrow(() ->
-                        new InvalidStatusStepAttributeException("Status step cannot be null"));
+    public List<AssignmentModel> getAssignmentsByStatus(String status) {
 
-
-        return Optional.ofNullable(userId)
-                .filter(userRepository::existsById)
-                .map(id -> assignmentRepository.findByStatusAndUserId(status, id))
-                .orElseThrow(() ->
-                        userId == null
-                        ? new InvalidUserAttributeException("User ID cannot be null")
-                        : new UserNotFoundException("User not found for this Id " + userId));
+        if (status == null || status.trim().isEmpty()) {
+            return assignmentRepository.findAll().stream()
+                    .map(Converter::toAssignmentModel)
+                    .collect(Collectors.toList());
+        }else {
+            return assignmentRepository.findAllByStatus(AssignmentStatusEnum.fromStatus(status)).stream()
+                    .map(Converter::toAssignmentModel)
+                    .collect(Collectors.toList());
+        }
     }
 
-    @Override
-    public List<Assignment> getAssignmentsByStatus(Integer statusStep) {
-        AssignmentStatusEnum status = Optional.ofNullable(statusStep)
-                .map(AssignmentStatusEnum::fromStatusStep)
-                .orElseThrow(() -> statusStep == null?
-                        new InvalidStatusStepAttributeException("Status step cannot be null")
-                        : new InvalidAssignmentStatusException(""));
 
-        return assignmentRepository.findAllByStatus(status);
-    }
 
-    @Override
-    public Assignment submitAssignment(Long assignmentId, String branchName, String githubUrl, Long userId) {
+    @Transactional
+    public AssignmentModel submitAssignment(Long assignmentId, String branchName, String githubUrl, Long userId) {
 
-        Optional.ofNullable(assignmentId)
-                .orElseThrow(() -> new InvalidAssignmentIdException("Assignment ID cannot be null"));
-
-        Optional.ofNullable(userId)
-                .filter(userRepository::existsById)
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 
         Optional.ofNullable(branchName)
                 .filter(name -> !name.isEmpty())
@@ -147,47 +152,63 @@ public class AssignmentService implements AssignmentServiceInterface<Assignment>
                 .orElseThrow(() -> new InvalidGithubUrlException("Invalid GitHub URL: " + githubUrl));
 
 
-        Assignment assignment = assignmentRepository.findById(assignmentId)
-                .orElseThrow(() -> new AssignmentNotFoundException("Assignment not found with ID: " + assignmentId));
+        Assignment assignment = assignmentRepository.findByIdAndUserId(assignmentId, userId)
+                .filter(assign -> {
+                    if (assign.getStatus().equals(AssignmentStatusEnum.PENDING_SUBMISSION)) {
+                        return true;
+                    }else {
+                        throw new InvalidStatusChangeException("This assignment cannot be submitted");
+                    }
 
-        assignment.setBranch(branchName);
-        assignment.setGithubUrl(githubUrl);
-        assignment.setStatus(AssignmentStatusEnum.SUBMITTED);
+                })
+                .map(assign -> {
+                    assign.setBranch(branchName);
+                    assign.setGithubUrl(githubUrl);
+                    assign.setStatus(AssignmentStatusEnum.SUBMITTED);
 
-        return assignmentRepository.save(assignment);
-    }
-    @Override
-    public Assignment startReview(Long assignmentId, Long reviewerId) {
+                    return assign;
+                })
+                .orElseThrow(() -> new AssignmentNotFoundException("Assignment not found with ID for this user: " + assignmentId));
 
-        Assignment assignment = this.getAssignmentById(assignmentId);
-
-        User reviewer = userRepository.findById(reviewerId).orElseThrow(()->new UserNotFoundException(""));
-
-         return Optional.of(assignment)
-                        .filter((a)-> a.getStatus().getStep().equals(2) && a.getStatus() != null)
-                                .map((a) -> {
-                                    a.setStatus(AssignmentStatusEnum.IN_REVIEW);
-                                    a.setCodeReviewer(reviewer);
-                                    return assignmentRepository.save(a);
-                                })
-                .orElseThrow(()-> assignment.getStatus() == null ?
-                        new InvalidAssignmentStatusException("A save assignment cannot have null status"):
-                        new StatusChangeException("This assignment is already reviewed "));
-
+        return Converter.toAssignmentModel(assignmentRepository.save(assignment));
     }
 
-    @Override
+    public AssignmentModel startReview(Long assignmentId, User reviewer) {
+
+        Assignment foundAssignment = assignmentRepository.findById(assignmentId)
+                .filter(assignment -> {
+                    if (assignment.getStatus().equals(AssignmentStatusEnum.SUBMITTED)) {
+                        return true;
+                    }else {
+                        throw new InvalidStatusChangeException("This assignment cannot be submitted ");
+                    }
+                })
+                .map(assignment -> {
+                    assignment.setStatus(AssignmentStatusEnum.IN_REVIEW);
+                    assignment.setCodeReviewer(reviewer);
+                    return assignment;
+                })
+                .orElseThrow(()-> new AssignmentNotFoundException("Assignment is not found"));
+
+        return Converter.toAssignmentModel(assignmentRepository.save(foundAssignment));
+    }
+
+
     public Assignment completeReview(Long assignmentId, String reviewVideoUrl, String reviewerId) {
         return null;
     }
 
-    @Override
+
     public Assignment requestResubmission(Long assignmentId, String feedback, String reviewerId) {
         return null;
     }
 
-    @Override
-    public AssignmentEnum[] getAssignmentList() {
-        return  AssignmentEnum.values();
+
+    public List<AssignmentEnum> getAssignmentListUsingStreams() {
+        return Arrays.stream(AssignmentEnum.values())
+                .collect(Collectors.toList());
+
     }
+
+
 }
