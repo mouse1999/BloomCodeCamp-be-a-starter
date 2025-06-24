@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@RequestMapping("api/users")
+@RequestMapping("api/auth")
 public class UserController {
     @Autowired
     private UserRepository userRepository;
@@ -51,7 +51,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/user")
+    @GetMapping
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
 
         UserDetails userDetails = resolveUserDetails(authentication.getPrincipal());
@@ -84,10 +84,9 @@ public class UserController {
     public ResponseEntity<?> validationEndpoint(
             @RequestHeader(name = "Authorization", required = false) String authorizationHeader) {
 
-        // 1. Check for missing or malformed Authorization header
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED) // 401 Unauthorized
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(new TokenValidationResponse(false, "Authorization header must be provided in 'Bearer <token>' format."));
         }
 

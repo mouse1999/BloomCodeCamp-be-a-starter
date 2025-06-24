@@ -39,6 +39,7 @@ public class User implements UserDetails {
         this.cohortStartDate = builder.cohortStartDate;
         this.userName = builder.userName;
         this.password = builder.password;
+        this.id = builder.id;
         if (builder.authorities != null) {
             this.authorities.addAll(builder.authorities);
         }
@@ -46,6 +47,10 @@ public class User implements UserDetails {
 
     public Long getId() { return id; }
     public Instant getCohortStartDate() { return cohortStartDate; }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -99,10 +104,15 @@ public class User implements UserDetails {
     public static class Builder {
         private Instant cohortStartDate;
         private String userName;
+        private Long id;
         private String password;
         private List<Authority> authorities;
 
         private Builder() {}
+        public Builder id(Long id) {
+             this.id = id;
+            return this;
+        }
 
         public Builder cohortStartDate(Instant cohortStartDate) {
             this.cohortStartDate = cohortStartDate;

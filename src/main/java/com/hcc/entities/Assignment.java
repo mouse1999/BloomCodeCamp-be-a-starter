@@ -71,7 +71,9 @@ public class Assignment {
         this.user = builder.user;
         this.codeReviewer = builder.codeReviewer;
         this.assignmentType = builder.assignmentType;
+        this.reviewedAt = builder.reviewedAt;
         this.createdAt = builder.createdAt;
+        this.id = builder().id;
     }
 
 
@@ -90,6 +92,11 @@ public class Assignment {
 
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public void setStatus(AssignmentStatusEnum status) { this.status = Objects.requireNonNull(status); }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setAssignmentNumber(Integer assignmentNumber) { this.assignmentNumber = Objects.requireNonNull(assignmentNumber); }
     public void setGithubUrl(String githubUrl) { this.githubUrl = githubUrl; }
     public void setBranch(String branch) { this.branch = branch; }
@@ -111,9 +118,11 @@ public class Assignment {
     }
 
     public static final class Builder {
+        private Long id;
         private AssignmentStatusEnum status;
         private AssignmentEnum assignmentType; // Renamed
         private Integer assignmentNumber;
+        private Instant reviewedAt;
         private String githubUrl;
         private String branch;
         private String reviewVideoUrl;
@@ -124,6 +133,10 @@ public class Assignment {
         // Ensure mandatory fields are handled appropriately (e.g., in a required constructor)
         // or through validation after build().
         // For builder, usually all fields are optional initially, then validated in build().
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public Builder status(AssignmentStatusEnum status) {
             this.status = status;
@@ -169,11 +182,15 @@ public class Assignment {
             this.createdAt = createdAt;
             return this;
         }
+        public Builder reviewedAt(Instant reviewedAt) {
+            this.reviewedAt = reviewedAt;
+            return  this;
+        }
 
         public Assignment build() {
 
             if (this.assignmentNumber == null) {
-                throw new IllegalStateException("Assignment number must be set.");
+                throw new IllegalStateException("Assignment number must be provided.");
             }
             if (this.user == null) {
                 throw new IllegalStateException("User must be set.");

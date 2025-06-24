@@ -18,9 +18,11 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
 
     List<Assignment> findByStatusOrderByCreatedAtDesc(AssignmentStatusEnum status);
     List<Assignment> findAllByStatusAndCodeReviewerIdOrderByReviewedAtDesc(AssignmentStatusEnum statusEnum, Long userId);
+    List<Assignment> findAllByStatusInAndCodeReviewerIdOrderByReviewedAtDesc(List<AssignmentStatusEnum> status, Long reviewerId);
     List<Assignment> findAllByCodeReviewerIdOrderByReviewedAtDesc(Long reviewerId);
 
     Optional<Assignment>  findByIdAndUserId(Long assignmentId, Long userId);
     List<Assignment> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+    Optional<Assignment> findByIdAndCodeReviewerId(Long assignmentId, Long reviewerId);
 
 }

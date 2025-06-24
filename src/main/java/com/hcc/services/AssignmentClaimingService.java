@@ -12,12 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Service // Marks this class as a Spring service component
+@Service
 public class AssignmentClaimingService {
 
     private final BlockingQueue<Assignment> unclaimedAssignments;
@@ -203,6 +204,7 @@ public class AssignmentClaimingService {
     private Optional<Assignment> processValidAssignment(Assignment assignment, User reviewer) {
         assignment.setStatus(AssignmentStatusEnum.IN_REVIEW);
         assignment.setCodeReviewer(reviewer);
+        assignment.setReviewedAt(Instant.now());
         Assignment savedAssignment = assignmentRepository.save(assignment);
 
         logger.info("Assignment {} claimed by reviewer {}, status updated to IN_REVIEW",
