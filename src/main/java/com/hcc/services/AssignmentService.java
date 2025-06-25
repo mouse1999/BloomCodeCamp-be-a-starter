@@ -98,8 +98,10 @@ public class AssignmentService  {
 
         List<AssignmentModel> assignments;
 
-        if (status.isEmpty()) {
-            assignments = getAssignmentsByUserId(userId);
+        if (status == null || status.isEmpty()) {
+            assignments = assignmentRepository.findAllByUserIdOrderByCreatedAtDesc(userId).stream()
+                    .map(Converter::toAssignmentModel)
+                    .collect(Collectors.toList());;
             logger.info("Fetched all {} assignments for user {}", assignments.size(), userId);
         } else {
             AssignmentStatusEnum statusEnum = parseAssignmentStatus(status);
@@ -119,7 +121,7 @@ public class AssignmentService  {
 
         List<Assignment> assignments;
 
-        if (status.isEmpty()) {
+        if (status == null || status.isEmpty()) {
             assignments = assignmentRepository.findAllByCodeReviewerIdOrderByReviewedAtDesc(reviewerId);
             logger.info("Fetched all {} assignments for reviewer {}", assignments.size(), reviewerId);
         } else {
@@ -176,7 +178,7 @@ public class AssignmentService  {
     public AssignmentModel submitOrEditAssignment(Long assignmentId, String branchName, String githubUrl, Long userId) {
         logger.debug("Submitting assignment ID {} by user {}", assignmentId, userId);
 
-        if (githubUrl == null || githubUrl.matches(GITHUB_URL_REGEX)) {
+        if (githubUrl == null || !githubUrl.matches(GITHUB_URL_REGEX)) {
             throw new InvalidGithubUrlException("Invalid GitHub URL");
         }
         if (branchName == null || branchName.trim().isEmpty()) {
@@ -263,6 +265,10 @@ public class AssignmentService  {
 
     @Transactional
     public AssignmentModel requestResubmission(Long assignmentId, String reviewVideoUrl) {
+        if (assignmentId == null) {
+            throw new IllegalArgumentException("assignment ID is null");
+
+        }
 
         validateReviewVideoUrl(reviewVideoUrl);
 
@@ -314,6 +320,10 @@ public class AssignmentService  {
     //--------------------------------------------------------------------------------
 
     public List<AssignmentModel> getClaimedAndUnclaimedAssignmentsForReviewer(Long reviewerId) {
+        if (reviewerId == null) {
+            throw new IllegalArgumentException("reviewer ID is null");
+
+        }
         List<Assignment> assignments = assignmentRepository
                 .findAllByStatusInAndCodeReviewerIdOrderByReviewedAtDesc(
                         List.of(AssignmentStatusEnum.SUBMITTED, AssignmentStatusEnum.RESUBMITTED),
