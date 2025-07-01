@@ -5,7 +5,7 @@ import com.hcc.dtos.request.userdto.SignUpRequest;
 import com.hcc.entities.Authority;
 import com.hcc.entities.User;
 import com.hcc.enums.AuthorityEnum;
-import com.hcc.exceptions.UserNotFoundException;
+import com.hcc.exceptions.userexceptions.UserNotFoundException;
 import com.hcc.exceptions.rolexceptions.InvalidRoleException;
 import com.hcc.exceptions.userexceptions.UserAlreadyExistsException;
 import com.hcc.models.UserModel;

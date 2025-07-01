@@ -6,13 +6,18 @@ plugins {
 
 group = 'com.hcc'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility= '17'
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
 
 repositories {
 	mavenCentral()
 }
 
 dependencies {
+	implementation 'org.postgresql:postgresql:42.7.3'
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'

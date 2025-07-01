@@ -41,7 +41,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(authenticationManager(), jwtUtils);
 
-        jwtAuthFilter.setFilterProcessesUrl("/api/users/login");
+        jwtAuthFilter.setFilterProcessesUrl("/api/auth/login");
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(CorsConfig.corsConfigurationSource()))
@@ -52,11 +52,11 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/users/login",
+                                "/api/auth/login",
                                 "/login",
-                                "/api/users/register",
-                                "/api/users/validate",
-                                "/users/register",
+                                "/api/auth/register",
+                                "/api/auth/validate",
+                                "/auth/register",
                                 "/static/**",
                                 "/error"
                         ).permitAll()
@@ -76,7 +76,7 @@ public class SecurityConfig {
 
                 // Configure logout (JWT specific)
                 .logout(logout -> logout
-                        .logoutUrl("/api/users/logout")
+                        .logoutUrl("/api/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
                             response.setContentType("application/json");
                             response.getWriter().write("{\"message\":\"Logout successful\"}");

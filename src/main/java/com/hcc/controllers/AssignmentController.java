@@ -69,10 +69,10 @@ public class AssignmentController {
     @GetMapping("/user/assignments/{assignmentNumber}/status")
     public ResponseEntity<?> existsAssignmentByNumber(@PathVariable  Integer assignmentNumber,
                                                       @AuthenticationPrincipal User user ) {
-        boolean doesExit = assignmentService.existsAssignmentByNumber(assignmentNumber, user.getId());
-        if (!doesExit) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Assignment not found");
-        }
+//        boolean doesExit = assignmentService.existsAssignmentByNumber(assignmentNumber, user.getId());
+//        if (!doesExit) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Assignment not found");
+//        }
 
         return ResponseEntity.ok(assignmentService.existsAssignmentByNumber(assignmentNumber, user.getId()));
     }

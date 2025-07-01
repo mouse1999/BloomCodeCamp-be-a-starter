@@ -37,10 +37,8 @@ public class GlobalExceptionHandler {
 
     // 400 - Bad Request
     @ExceptionHandler({
-            InvalidAssignmentIdException.class,
             InvalidAssignmentNumberException.class,
             InvalidGithubUrlException.class,
-            InvalidBranchNameException.class,
             IllegalArgumentException.class
     })
     public ResponseEntity<ErrorResponse> handleBadRequestExceptions(

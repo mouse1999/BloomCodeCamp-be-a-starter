@@ -324,14 +324,21 @@ public class AssignmentService  {
             throw new IllegalArgumentException("reviewer ID is null");
 
         }
-        List<Assignment> assignments = assignmentRepository
-                .findAllByStatusInAndCodeReviewerIdOrderByReviewedAtDesc(
-                        List.of(AssignmentStatusEnum.SUBMITTED, AssignmentStatusEnum.RESUBMITTED),
-                        reviewerId
-                );
-        return assignments.stream()
+
+        Stream<Assignment> submittedAssignmentsStream = assignmentRepository
+                .findAllByStatus(AssignmentStatusEnum.SUBMITTED)
+                .stream();
+
+        Stream<Assignment> resubmittedAssignmentsStream = assignmentRepository
+                .findAllByStatusAndCodeReviewerIdOrderByReviewedAtDesc(AssignmentStatusEnum.RESUBMITTED, reviewerId)
+                .stream();
+
+        Stream<Assignment> combinedStream = Stream.concat(submittedAssignmentsStream, resubmittedAssignmentsStream);
+
+        return combinedStream
                 .map(Converter::toAssignmentModel)
                 .collect(Collectors.toList());
+
     }
 
     @Transactional

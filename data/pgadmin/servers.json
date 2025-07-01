@@ -6,7 +6,7 @@
       "Port": 5432,
       "Username": "postgresOne",
       "Password": "Victor?!$070",
-      "Host": "pgbd",
+      "Host": "pgdb",
       "SSLMode": "prefer",
       "MaintenanceDB": "postgres"
     }
