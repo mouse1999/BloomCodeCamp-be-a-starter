@@ -10,10 +10,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class JwtConfig {
 
-    @Value("${jwt.secret}")
+    @Value("${JWT_SECRET}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration.ms}")
+    @Value("${JWT_EXPIRATION_MS}")
     private int jwtExpirationMs;
 
     @Bean

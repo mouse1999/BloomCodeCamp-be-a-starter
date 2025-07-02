@@ -1,23 +1,25 @@
-# version: '3.8'
+
+
+#version: '3'
 #
 #services:
 #  pgdb:
-#    image: postgres:15 # Specify a version to ensure consistency (e.g., postgres:15)
+#    image: postgres
 #    container_name: pg_server_api0121
 #    ports:
 #      - '5550:5432'
 #    environment:
-#      POSTGRES_USER: ${POSTGRES_USER}
-#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#      POSTGRES_DB: ${POSTGRES_DB}
+#      - POSTGRES_USER=${POSTGRES_USER}
+#      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+#      - POSTGRES_DB=${POSTGRES_DB}
 #    volumes:
-#
 #      - ./docker/pg/postgres.conf:/etc/postgresql/postgresql.conf
 #      - ./data/pg:/var/lib/postgresql/data
 #    command: postgres -c config_file=/etc/postgresql/postgresql.conf
 #    networks:
 #      - postgres
 #    restart: always
+#
 #
 #  pgadminFp:
 #    container_name: pgadmin_0121
@@ -33,7 +35,6 @@
 #    networks:
 #      - postgres
 #    restart: unless-stopped
-#
 #  spring-app:
 #    build: . #
 #    container_name: spring_code_camp
@@ -44,44 +45,45 @@
 #      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
 #      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
 #      JWT_SECRET: ${JWT_SECRET}
+#      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
 #
 #    depends_on:
 #      - pgdb # Ensures the PostgreSQL database starts and is available before the Spring app
 #    networks:
 #      - postgres # Connects the Spring app to the same network as the database
 #
+#
 #networks:
 #  postgres:
-#    driver: bridge # Defines the custom network for these services
-#
-#
-#
+#    driver: bridge
 
 
-version: '3.8'
+version: '3.8' # Use a newer version for healthcheck features
 
 services:
   pgdb:
     image: postgres
     container_name: pg_server_api0121
     ports:
-      - '5550:5433'
+      - '5550:5432'
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
+      # Ensure these paths are correct relative to your docker-compose.yml
       - ./docker/pg/postgres.conf:/etc/postgresql/postgresql.conf
-      - pg_data:/var/lib/postgresql/data
+      - ./data/pg:/var/lib/postgresql/data
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     networks:
       - postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
     restart: always
+    healthcheck: # <-- ADD THIS HEALTHCHECK BLOCK
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s # Check every 5 seconds
+      timeout: 5s  # Timeout if a check takes longer than 5 seconds
+      retries: 5   # Retry 5 times before marking as unhealthy
+      start_period: 10s # Give the container 10 seconds to start up before starting health checks
 
   pgadminFp:
     container_name: pgadmin_0121
@@ -89,41 +91,36 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_SERVER_JSON_FILE: /tmp/.pgadmin/servers.json
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - ./data/pgadmin:/tmp/.pgadmin
     ports:
       - "${PGADMIN_PORT:-5051}:80"
     networks:
       - postgres
-    depends_on:
+    restart: unless-stopped
+    depends_on: # pgAdmin can also wait for the database to be healthy
       pgdb:
         condition: service_healthy
-    restart: unless-stopped
 
   spring-app:
-    build: .
+    build: . # Build the image from the Dockerfile in the current directory
     container_name: spring_code_camp
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://pgdb:5433/${POSTGRES_DB}?connectionTimeout=30000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pgdb:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      SPRING_DATASOURCE_HIKARI_MAXIMUM-POOL-SIZE: 5
-      SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT: 60000
       JWT_SECRET: ${JWT_SECRET}
-      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
-    depends_on:
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+    depends_on: # <-- MODIFY THIS depends_on BLOCK
       pgdb:
-        condition: service_healthy
+        condition: service_healthy # This ensures pgdb is healthy before spring-app starts
     networks:
-      - postgres
-    restart: unless-stopped
+      - postgres # Connects the Spring app to the same network as the database
+
 
 networks:
   postgres:
     driver: bridge
-
-volumes:
-  pg_data:
-  pgadmin_data:
