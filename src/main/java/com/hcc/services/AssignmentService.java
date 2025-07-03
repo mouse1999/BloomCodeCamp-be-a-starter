@@ -308,8 +308,7 @@ public class AssignmentService  {
             logger.warn("Invalid status transition from {} to {} for assignment {}",
                     assignment.getStatus(), targetStatus, assignment.getId());
             throw new InvalidStatusChangeException(
-                    "Cannot transition assignment from %s to %s"
-                            .formatted(assignment.getStatus(), targetStatus));
+                    "Assignment status cannot be changed");
         }
     }
     private void updateAssignmentForResubmission(Assignment assignment,
@@ -369,7 +368,7 @@ public class AssignmentService  {
             logger.warn("Invalid reclaim attempt from status {} for assignment {}",
                     assignment.getStatus(), assignment.getId());
             throw new InvalidStatusChangeException(
-                    "Cannot reclaim assignment in %s status".formatted(assignment.getStatus()));
+                    "Cannot reclaim assignment");
         }
     }
 
