@@ -135,7 +135,7 @@ public class User implements UserDetails {
         }
 
         public User build() {
-            // Validate required fields
+
             if (userName == null || userName.trim().isEmpty()) {
                 throw new IllegalStateException("Username is required.");
             }

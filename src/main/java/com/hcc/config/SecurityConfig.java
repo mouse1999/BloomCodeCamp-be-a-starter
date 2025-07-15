@@ -74,18 +74,18 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
 
-                // Configure logout (JWT specific)
+
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
                             response.setContentType("application/json");
                             response.getWriter().write("{\"message\":\"Logout successful\"}");
                         })
-                        .deleteCookies("JWT") // Only JWT cookie for stateless
+                        .deleteCookies("JWT")
                         .permitAll()
                 );
 
-        // Remove formLogin if using pure JWT
+
         http.formLogin(AbstractHttpConfigurer::disable);
 
         return http.build();

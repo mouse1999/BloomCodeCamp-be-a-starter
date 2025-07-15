@@ -22,7 +22,6 @@ public class AssignmentModel {
 
     private String codeReviewerName;
 
-    // JPA-required no-arg constructor
 
     public AssignmentModel() {
     }
@@ -75,7 +74,7 @@ public class AssignmentModel {
     public static final class Builder {
         private Long id;
         private String status;
-        private String assignmentType; // Renamed
+        private String assignmentType;
         private Integer assignmentNumber;
         private String githubUrl;
         private String branch;
@@ -96,7 +95,7 @@ public class AssignmentModel {
             return this;
         }
 
-        public Builder assignmentType(String assignmentType) { // Renamed method
+        public Builder assignmentType(String assignmentType) {
             this.assignmentType = assignmentType;
             return this;
         }

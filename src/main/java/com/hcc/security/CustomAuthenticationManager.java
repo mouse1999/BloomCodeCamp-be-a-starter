@@ -33,7 +33,7 @@ public class CustomAuthenticationManager implements AuthenticationManager {
         }
 
         return new UsernamePasswordAuthenticationToken(
-                userDetail, //always remember to use user object instead of string so the return principal can be an object
+                userDetail,
                 userDetail.getPassword(),
                 userDetail.getAuthorities());
     }

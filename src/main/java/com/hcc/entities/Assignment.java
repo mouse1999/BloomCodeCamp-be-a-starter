@@ -54,7 +54,7 @@ public class Assignment {
     @JoinColumn(name = "reviewer_id")
     private User codeReviewer;
 
-    // JPA-required no-arg constructor
+
 
     public Assignment() {
         this.createdAt = Instant.now();
@@ -120,7 +120,7 @@ public class Assignment {
     public static final class Builder {
         private Long id;
         private AssignmentStatusEnum status;
-        private AssignmentEnum assignmentType; // Renamed
+        private AssignmentEnum assignmentType;
         private Integer assignmentNumber;
         private Instant reviewedAt;
         private String githubUrl;
@@ -130,9 +130,7 @@ public class Assignment {
         private User user;
         private User codeReviewer;
 
-        // Ensure mandatory fields are handled appropriately (e.g., in a required constructor)
-        // or through validation after build().
-        // For builder, usually all fields are optional initially, then validated in build().
+
         public Builder id(Long id) {
             this.id = id;
             return this;
@@ -214,8 +212,7 @@ public class Assignment {
 
     @Override
     public int hashCode() {
-        // Important: Return a constant (e.g., 31) for transient entities or use ID only
-        return id == null ? 31 : Objects.hash(id); // Use ID for persisted entities
+        return id == null ? 31 : Objects.hash(id);
     }
 
     @Override
@@ -229,7 +226,7 @@ public class Assignment {
                 ", branch='" + branch + '\'' +
                 ", reviewVideoUrl='" + reviewVideoUrl + '\'' +
                 ", reviewedAt=" + reviewedAt +
-                ", assignmentType=" + assignmentType + // Renamed
+                ", assignmentType=" + assignmentType + //
                 ", user=" + (user != null ? user.getId() : "null") + // Avoid fetching full user object
                 ", codeReviewer=" + (codeReviewer != null ? codeReviewer.getId() : "null") +
                 '}';

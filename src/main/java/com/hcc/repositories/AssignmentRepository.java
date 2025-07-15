@@ -12,11 +12,10 @@ import java.util.Optional;
 @Repository
 public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     boolean existsByAssignmentNumberAndUserId(Integer assignmentNumber, Long userId);
-//    List<Assignment> findByStatusAndUserId(AssignmentStatusEnum statusEnum, Long userId);
+
     List<Assignment> findAllByStatusAndUserId(AssignmentStatusEnum statusEnum, Long userId);
     List<Assignment> findAllByStatus(AssignmentStatusEnum statusEnum);
 
-    List<Assignment> findByStatusOrderByCreatedAtDesc(AssignmentStatusEnum status);
     List<Assignment> findAllByStatusAndCodeReviewerIdOrderByReviewedAtDesc(AssignmentStatusEnum statusEnum, Long userId);
     List<Assignment> findAllByStatusInAndCodeReviewerIdOrderByReviewedAtDesc(List<AssignmentStatusEnum> status, Long reviewerId);
     List<Assignment> findAllByCodeReviewerIdOrderByReviewedAtDesc(Long reviewerId);
