@@ -130,7 +130,7 @@ public class User implements UserDetails {
         }
 
         public Builder authorities(List<Authority> authorities) {
-            this.authorities = new ArrayList<>(authorities); // Defensive copy
+            this.authorities = new ArrayList<>(authorities);
             return this;
         }
 

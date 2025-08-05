@@ -26,9 +26,7 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-    @Autowired
     private final AuthenticationManager authenticationManager;
-    @Autowired
     private final JwtUtils jwtUtils;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
@@ -42,7 +40,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                                 HttpServletResponse response)
             throws AuthenticationException {
 
-        // 1. Get request body safely
         String requestBody;
         try {
             requestBody = request.getReader()
@@ -52,12 +49,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             throw new AuthenticationServiceException("Failed to read request body", e);
         }
 
-        // 2. Validate JSON structure
         if (!StringUtils.hasText(requestBody)) {
             throw new AuthenticationCredentialsNotFoundException("Empty request body");
         }
 
-        // 3. Parse with proper error handling
         SignInRequest signInRequest;
         try {
             signInRequest = new ObjectMapper().readValue(requestBody, SignInRequest.class);
@@ -65,13 +60,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             throw new AuthenticationServiceException("Invalid JSON format", e);
         }
 
-        // 4. Validate credentials presence
         if (!StringUtils.hasText(signInRequest.getUsername()) ||
                 !StringUtils.hasText(signInRequest.getPassword())) {
             throw new AuthenticationCredentialsNotFoundException("Missing credentials");
         }
 
-        // 5. Authenticate
         return authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         signInRequest.getUsername(),
@@ -104,6 +97,4 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.getWriter().write(new ObjectMapper().writeValueAsString(jwtResponse));
         response.addHeader("Authorization", "Bearer " + jwt);
     }
-
-
 }

@@ -34,13 +34,12 @@ public class Assignment {
     @Column(name = "github_url")
     private String githubUrl;
 
-    private String branch; // Default to nullable in DB
+    private String branch;
 
     @Column(name = "review_video_url")
     private String reviewVideoUrl;
 
-    private Instant reviewedAt; // Nullable unt
-    // il review
+    private Instant reviewedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "assignment_type")
@@ -104,7 +103,7 @@ public class Assignment {
     public void setReviewedAt(Instant reviewedAt) { this.reviewedAt = reviewedAt; }
     public void setUser(User user) { this.user = user; }
     public void setCodeReviewer(User codeReviewer) { this.codeReviewer = codeReviewer; }
-    public void setAssignmentType(AssignmentEnum assignmentType) { this.assignmentType = assignmentType; } // Renamed setter
+    public void setAssignmentType(AssignmentEnum assignmentType) { this.assignmentType = assignmentType; }
 
 
     public void updateReviewDetails(String videoUrl, Instant reviewedAt, User reviewer) {
@@ -141,7 +140,7 @@ public class Assignment {
             return this;
         }
 
-        public Builder assignmentType(AssignmentEnum assignmentType) { // Renamed method
+        public Builder assignmentType(AssignmentEnum assignmentType) {
             this.assignmentType = assignmentType;
             return this;
         }
@@ -204,10 +203,10 @@ public class Assignment {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (id == null) return false; // If this entity is not persisted, it cannot be equal to another entity by ID
+        if (id == null) return false;
         if (o == null || getClass() != o.getClass()) return false;
         Assignment that = (Assignment) o;
-        return Objects.equals(id, that.id); // Only compare by ID for persisted entities
+        return Objects.equals(id, that.id);
     }
 
     @Override
@@ -227,7 +226,7 @@ public class Assignment {
                 ", reviewVideoUrl='" + reviewVideoUrl + '\'' +
                 ", reviewedAt=" + reviewedAt +
                 ", assignmentType=" + assignmentType + //
-                ", user=" + (user != null ? user.getId() : "null") + // Avoid fetching full user object
+                ", user=" + (user != null ? user.getId() : "null") +
                 ", codeReviewer=" + (codeReviewer != null ? codeReviewer.getId() : "null") +
                 '}';
     }

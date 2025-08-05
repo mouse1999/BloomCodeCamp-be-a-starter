@@ -23,30 +23,33 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private  UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final JwtUtils jwtUtils;
+    private final AuthExceptionHandler authExceptionHandler;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationManager customAuthenticationManager;
 
-    @Autowired
-    private  JwtUtils jwtUtils;
-    @Autowired
-    private  PasswordEncoder passwordEncoder;
-    @Autowired
-    private  AuthExceptionHandler authExceptionHandler;
-    @Autowired
-    private  CustomAccessDeniedHandler customAccessDeniedHandler;
-
-
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService,
+                          JwtUtils jwtUtils,
+                          PasswordEncoder passwordEncoder,
+                          AuthExceptionHandler authExceptionHandler,
+                          CustomAccessDeniedHandler customAccessDeniedHandler,
+                          CustomAuthenticationManager customAuthenticationManager) {
+        this.userDetailsService = userDetailsService;
+        this.jwtUtils = jwtUtils;
+        this.authExceptionHandler = authExceptionHandler;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
+        this.customAuthenticationManager = customAuthenticationManager;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(authenticationManager(), jwtUtils);
+        JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(customAuthenticationManager, jwtUtils);
 
         jwtAuthFilter.setFilterProcessesUrl("/api/auth/login");
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(CorsConfig.corsConfigurationSource()))
-
-
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -60,21 +63,15 @@ public class SecurityConfig {
                                 "/static/**",
                                 "/error"
                         ).permitAll()
-
                         .anyRequest().authenticated()
                 )
-
                 .addFilter(jwtAuthFilter)
                 .addFilterBefore(new JwtAuthorizationFilter(jwtUtils, userDetailsService),
                         UsernamePasswordAuthenticationFilter.class)
-
-
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authExceptionHandler)
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
-
-
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
@@ -85,18 +82,8 @@ public class SecurityConfig {
                         .permitAll()
                 );
 
-
         http.formLogin(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
-
-
-    @Bean
-    public AuthenticationManager authenticationManager() {
-        return new CustomAuthenticationManager(userDetailsService, passwordEncoder);
-    }
-
-
-
 }

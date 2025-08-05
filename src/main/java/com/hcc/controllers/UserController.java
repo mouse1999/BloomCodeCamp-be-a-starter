@@ -25,35 +25,32 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("api/auth")
 public class UserController {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private JwtUtils jwtUtils;
+    private final UserService userService;
+    private final JwtUtils jwtUtils;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
-
+    public UserController(UserService userService,
+                          JwtUtils jwtUtils,
+                          UserDetailsServiceImpl userDetailsService) {
+        this.userService = userService;
+        this.jwtUtils = jwtUtils;
+        this.userDetailsService = userDetailsService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest request) {
         UserModel userModel = userService.registerUser(request);
-
         return ResponseEntity.ok(userModel);
     }
 
     @GetMapping("/{username}")
     public ResponseEntity<?> getUserByUserName(@PathVariable String username) {
         UserModel userModel = userService.getUserByUserName(username);
-
         return ResponseEntity.ok(userModel);
     }
 
-
     @GetMapping
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-
         UserDetails userDetails = resolveUserDetails(authentication.getPrincipal());
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -75,9 +72,7 @@ public class UserController {
     @DeleteMapping("/{username}")
     public ResponseEntity<Void> deleteUser(@PathVariable String username) {
         userService.deleteUser(username);
-        return ResponseEntity.noContent()
-                .build();
-
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/validate")
@@ -96,13 +91,11 @@ public class UserController {
             return ResponseEntity
                     .ok(new TokenValidationResponse(true, "Token is valid."));
         } else {
-            // If validation fails (e.g., expired, invalid signature, malformed payload)
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(new TokenValidationResponse(false, "Token is invalid or expired."));
         }
     }
-
 
     private UserDetails resolveUserDetails(Object principal) {
         if (principal instanceof UserDetails) {
@@ -112,6 +105,4 @@ public class UserController {
         }
         throw new IllegalStateException("Unknown principal type: " + principal.getClass());
     }
-
-
 }

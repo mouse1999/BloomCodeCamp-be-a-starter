@@ -4,18 +4,17 @@ import java.util.Objects;
 
 public class AssignmentModel {
 
-
     private Long id;
     private String createdAt;
     private String status;
     private Integer assignmentNumber;
     private String githubUrl;
 
-    private String branch; // Default to nullable in DB
+    private String branch;
 
     private String reviewVideoUrl;
 
-    private String reviewedAt; // Nullable until review
+    private String reviewedAt;
 
     private String assignmentType;
     private String learnerName;
@@ -63,7 +62,7 @@ public class AssignmentModel {
     public void setReviewedAt(String reviewedAt) { this.reviewedAt = reviewedAt; }
     public void setLearnerName(String learnerName) { this.learnerName = learnerName; }
     public void setCodeReviewerName(String codeReviewer) { this.codeReviewerName = codeReviewerName; }
-    public void setAssignmentType(String assignmentType) { this.assignmentType = assignmentType; } // Renamed setter
+    public void setAssignmentType(String assignmentType) { this.assignmentType = assignmentType; }
 
 
 

@@ -29,8 +29,6 @@ import java.util.stream.Stream;
 @Service
 public class AssignmentService  {
 
-
-    @Autowired
     private final AssignmentRepository assignmentRepository;
     private static final String GITHUB_URL_REGEX = "^(https?://)?(www\\.)?github\\.com/.+";
     private static final Logger logger = LoggerFactory.getLogger(AssignmentService.class);
@@ -175,6 +173,7 @@ public class AssignmentService  {
 
 
 
+    @Transactional
     public AssignmentModel submitOrEditAssignment(Long assignmentId, String branchName, String githubUrl, Long userId) {
         logger.debug("Submitting assignment ID {} by user {}", assignmentId, userId);
 
@@ -212,7 +211,8 @@ public class AssignmentService  {
 
         return Converter.toAssignmentModel(assignmentRepository.save(assignment));
     }
-    @Transactional
+
+
     public AssignmentModel getAssignmentByIdAndReviewer(Long assignmentId, Long reviewerId) {
         logger.debug("Fetching assignment ID {} for reviewer {}", assignmentId, reviewerId);
 
@@ -230,6 +230,7 @@ public class AssignmentService  {
 
 
 
+    @Transactional
     public AssignmentModel completeReview(Long assignmentId, String reviewVideoUrl) {
         logger.debug("Completing review for assignment ID: {}", assignmentId);
 

@@ -23,16 +23,20 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class UserService {
-    @Autowired
-    private  UserRepository userRepository;
-    @Autowired
-    private  AuthorityRepository authorityRepository;
-    @Autowired
-    private  PasswordEncoder passwordEncoder;
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+        private final UserRepository userRepository;
+        private final AuthorityRepository authorityRepository;
+        private final PasswordEncoder passwordEncoder;
+        private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
+        public UserService(UserRepository userRepository,
+                           AuthorityRepository authorityRepository,
+                           PasswordEncoder passwordEncoder) {
+            this.userRepository = userRepository;
+            this.authorityRepository = authorityRepository;
+            this.passwordEncoder = passwordEncoder;
+        }
 
 
-    @Transactional
     public UserModel registerUser(SignUpRequest request) {
         logger.debug("Attempting to register user: {}", request.getUserName());
 
@@ -52,7 +56,25 @@ public class UserService {
         return Converter.toUserModel(fetchUserWithAuthorities(user.getUsername()));
     }
 
-    // --- Helper Methods ---------------------------
+
+
+    public UserModel getUserByUserName(String username) {
+        User user  = userRepository.findByUserName(username)
+                .orElseThrow(()-> new UserNotFoundException("username not found"));
+
+        return Converter.toUserModel(user);
+    }
+
+    public boolean userExists(String username) {
+        return userRepository.existsByUserName(username);
+    }
+
+
+    public void deleteUser(String username) {
+        User user = userRepository.findByUserName(username)
+                .orElseThrow(()-> new UserNotFoundException("this username is not found"));
+        userRepository.delete(user);
+    }
 
     private User createUser(SignUpRequest request) {
         return User.builder()
@@ -92,24 +114,6 @@ public class UserService {
                 });
     }
 
-    //--------------------------------------------------------------------------------------------------
 
-    public UserModel getUserByUserName(String username) {
-        User user  = userRepository.findByUserName(username)
-                .orElseThrow(()-> new UserNotFoundException("username not found"));
-
-        return Converter.toUserModel(user);
-    }
-
-    public boolean userExists(String username) {
-        return userRepository.existsByUserName(username);
-    }
-
-
-    public void deleteUser(String username) {
-        User user = userRepository.findByUserName(username)
-                .orElseThrow(()-> new UserNotFoundException("this username is not found"));
-        userRepository.delete(user);
-    }
 
 }

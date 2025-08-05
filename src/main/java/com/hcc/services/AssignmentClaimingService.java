@@ -26,13 +26,6 @@ public class AssignmentClaimingService {
     private static final Logger logger = LoggerFactory.getLogger(AssignmentClaimingService.class);
     private final AssignmentRepository assignmentRepository;
 
-    /**
-     * Constructor for Dependency Injection. Spring will automatically inject
-     * AssignmentRepository and UserService instances.
-     *
-     * @param assignmentRepository The JPA repository for Assignment entities.
-     */
-    @Autowired
     public AssignmentClaimingService(AssignmentRepository assignmentRepository) {
 
         this.assignmentRepository = assignmentRepository;
@@ -62,14 +55,17 @@ public class AssignmentClaimingService {
                 );
     }
     /**
-     * INTERNAL METHOD: Handles the core logic for claiming a specific assignment,
-     * including per-assignment locking, re-fetching current state, updating status and reviewer,
-     * and persisting changes to the database.
-     * This method ensures thread-safety for individual assignment updates.
+     * Claims an assignment for a specific reviewer, handling all the necessary locking and state updates.
      *
-     * @param assignment The assignment entity (potentially stale) taken from the queue.
-     * @param reviewer The user (reviewer) who will be assigned to this assignment.
-     * @return The updated and saved Assignment entity if successful, {@code null} otherwise.
+     *  Locks the assignment to prevent concurrent modifications
+     *  Gets the current state from the database
+     *  Updates the status and assigns the reviewer
+     *  Saves all changes
+     *
+     *
+     * @param assignment The assignment
+     * @param reviewer The user who should review this assignment
+     * @return The updated assignment if claimed successfully, null if the claim failed
      */
     private Optional<Assignment> handleAssignmentClaimInternal(Assignment assignment, User reviewer) {
         final Long assignmentId = assignment.getId();

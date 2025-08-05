@@ -1,9 +1,11 @@
 package com.hcc.config;
 
 import com.hcc.utils.JwtUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -16,9 +18,12 @@ public class JwtConfig {
     @Value("${JWT_EXPIRATION_MS}")
     private int jwtExpirationMs;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @Bean
     public JwtUtils jwtUtils() {
-        return new JwtUtils(jwtSecret, jwtExpirationMs);
+        return new JwtUtils(jwtSecret, jwtExpirationMs, userDetailsService);
     }
     @Bean
     public PasswordEncoder passwordEncoder() {

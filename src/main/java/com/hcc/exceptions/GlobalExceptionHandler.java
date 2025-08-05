@@ -20,7 +20,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // 404 - Not Found
+    // 404
     @ExceptionHandler(AssignmentNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleAssignmentNotFoundException(
             AssignmentNotFoundException ex, WebRequest request) {
@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    // 400 - Bad Request
+    // 400
     @ExceptionHandler({
             InvalidAssignmentNumberException.class,
             InvalidGithubUrlException.class,
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // 409 - Conflict
+    // 409
     @ExceptionHandler({
             AssignmentAlreadySubmittedException.class,
             InvalidStatusChangeException.class
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
-    // 422 - Unprocessable Entity
+    // 422
     @ExceptionHandler(InvalidAssignmentStatusException.class)
     public ResponseEntity<ErrorResponse> handleInvalidAssignmentStatusException(
             InvalidAssignmentStatusException ex, WebRequest request) {
@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
-    // 400 - Validation Errors
+    // 400
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex, WebRequest request) {
@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // 500 - Server Errors
+    // 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(
             Exception ex, WebRequest request) {

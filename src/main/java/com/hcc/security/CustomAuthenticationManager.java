@@ -13,12 +13,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CustomAuthenticationManager implements AuthenticationManager {
-    @Autowired
     private final UserDetailsService userDetailsService;
-    @Autowired
     private final PasswordEncoder passwordEncoder;
 
-    public CustomAuthenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    public CustomAuthenticationManager(UserDetailsService userDetailsService,
+                                       PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -26,7 +25,6 @@ public class CustomAuthenticationManager implements AuthenticationManager {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         final UserDetails userDetail = userDetailsService.loadUserByUsername(authentication.getName());
-
 
         if (!passwordEncoder.matches(authentication.getCredentials().toString(), userDetail.getPassword())) {
             throw new BadCredentialsException("Wrong password");

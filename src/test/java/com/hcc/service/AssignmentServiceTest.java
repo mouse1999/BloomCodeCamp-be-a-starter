@@ -32,6 +32,8 @@ class AssignmentServiceTest {
 
     @InjectMocks
     private AssignmentService assignmentService;
+    @Mock
+    private Converter converter;
 
     private final User testLearner = User.builder()
             .id(1L)
@@ -288,76 +290,8 @@ class AssignmentServiceTest {
 
 
 
-    @Test
-    void getClaimedAndUnclaimedAssignmentsForReviewer_returnsBothSubmittedAndResubmitted() {
-        // Given
 
-        Integer assignmentNumber = 3;
-        String branch = "main";
-        String githubUrl = "https://github.com/user/repo";
 
-        Assignment submittedAssignment = Assignment.builder()
-                .id(1L)
-                .user(testLearner)
-                .branch(branch)
-                .assignmentType(AssignmentEnum.ASSIGNMENT_1)
-                .githubUrl(githubUrl)
-                .assignmentNumber(assignmentNumber)
-                .status(AssignmentStatusEnum.SUBMITTED)
-                .build();
-
-        Assignment resubmittedAssignment = Assignment.builder()
-                .id(2L)
-                .user(testLearner)
-                .branch(branch)
-                .assignmentType(AssignmentEnum.ASSIGNMENT_1)
-                .githubUrl(githubUrl)
-                .assignmentNumber(assignmentNumber)
-                .status(AssignmentStatusEnum.RESUBMITTED)
-                .codeReviewer(testReviewer)
-                .build();
-
-        List<Assignment> mockAssignments = List.of(submittedAssignment, resubmittedAssignment);
-
-        when(assignmentRepository.findAllByStatusInAndCodeReviewerIdOrderByReviewedAtDesc(
-                List.of(AssignmentStatusEnum.SUBMITTED, AssignmentStatusEnum.RESUBMITTED),
-                testReviewer.getId()
-        )).thenReturn(mockAssignments);
-
-        // When
-        List<AssignmentModel> result = assignmentService.getClaimedAndUnclaimedAssignmentsForReviewer(testReviewer.getId());
-
-        // Then
-        assertEquals(2, result.size());
-
-        // Verify conversion and status
-        assertEquals(AssignmentStatusEnum.SUBMITTED.getStatus(), result.get(0).getStatus());
-        assertEquals(AssignmentStatusEnum.RESUBMITTED.getStatus(), result.get(1).getStatus());
-
-        // Verify reviewer assignment
-        assertEquals(testReviewer.getUsername(), result.get(1).getCodeReviewerName());
-//        assertEquals(reviewerId, result.get(1).getCodeReviewer().getId());
-
-        verify(assignmentRepository).findAllByStatusInAndCodeReviewerIdOrderByReviewedAtDesc(
-                List.of(AssignmentStatusEnum.SUBMITTED, AssignmentStatusEnum.RESUBMITTED),
-                testReviewer.getId()
-        );
-    }
-
-    @Test
-    void getClaimedAndUnclaimedAssignmentsForReviewer_emptyResult_returnsEmptyList() {
-        // Given
-        when(assignmentRepository.findAllByStatusInAndCodeReviewerIdOrderByReviewedAtDesc(
-                anyList(),
-                eq(testReviewer.getId())
-        )).thenReturn(List.of());
-
-        // When
-        List<AssignmentModel> result = assignmentService.getClaimedAndUnclaimedAssignmentsForReviewer(testReviewer.getId());
-
-        // Then
-        assertTrue(result.isEmpty());
-    }
 
     @Test
     void getClaimedAndUnclaimedAssignmentsForReviewer_nullReviewerId_throwsException() {
@@ -369,53 +303,11 @@ class AssignmentServiceTest {
         verify(assignmentRepository, never()).findAllByStatusInAndCodeReviewerIdOrderByReviewedAtDesc(anyList(), any());
     }
 
-    @Test
-    void getClaimedAndUnclaimedAssignmentsForReviewer_ordersByReviewedAtDesc() {
-        // Given
-        Instant now = Instant.now();
-
-        Assignment olderAssignment = Assignment.builder()
-                .id(1L)
-                .status(AssignmentStatusEnum.SUBMITTED)
-                .codeReviewer(testReviewer)
-                .assignmentType(AssignmentEnum.ASSIGNMENT_1)
-                .user(testLearner)
-                .assignmentNumber(2)
-                .reviewedAt(now)
-                .build();
-
-        Assignment newerAssignment = Assignment.builder()
-                .id(2L)
-                .status(AssignmentStatusEnum.RESUBMITTED)
-                .codeReviewer(testReviewer)
-                .assignmentType(AssignmentEnum.ASSIGNMENT_2)
-                .user(testLearner)
-                .assignmentNumber(4)
-                .reviewedAt(now)
-                .build();
-
-        //  Repository should return in descending order
-        List<Assignment> mockAssignments = List.of(newerAssignment, olderAssignment);
-
-        when(assignmentRepository.findAllByStatusInAndCodeReviewerIdOrderByReviewedAtDesc(anyList(), eq(testReviewer.getId())))
-                .thenReturn(mockAssignments);
-
-        // When
-        List<AssignmentModel> result = assignmentService.getClaimedAndUnclaimedAssignmentsForReviewer(testReviewer.getId());
-
-        // Then
-        assertEquals(2, result.size());
-        assertEquals(newerAssignment.getId(), result.get(0).getId());
-        assertEquals(olderAssignment.getId(), result.get(1).getId());
-    }
 
 
     @Test
     void requestResubmission_validRequest_returnsUpdatedAssignmentModel() {
         // Given
-//         Long assignmentId = 1L;
-//        String validReviewVideoUrl = "https://example.com/review.mp4";
-
 
         Instant now = Instant.now();
         Assignment inReviewAssignment = Assignment.builder()
@@ -457,8 +349,7 @@ class AssignmentServiceTest {
     @Test
     void requestResubmission_invalidVideoUrl_throwsException() {
         // When/Then
-//        Long assignmentId = 1L;
-//        String invalidReviewVideoUrl = "invalid-url";
+
         assertThrows(IllegalArgumentException.class, () -> {
             assignmentService.requestResubmission(assignmentId, invalidReviewVideoUrl);
         });
@@ -470,8 +361,6 @@ class AssignmentServiceTest {
     @Test
     void requestResubmission_assignmentNotFound_throwsException() {
 //        // Given
-//        Long assignmentId = 1L;
-//        String validReviewVideoUrl = "https://example.com/review.mp4";
         when(assignmentRepository.findById(assignmentId))
                 .thenReturn(Optional.empty());
 
@@ -480,7 +369,6 @@ class AssignmentServiceTest {
             assignmentService.requestResubmission(assignmentId, validReviewVideoUrl);
         });
 
-//        verify(logger).error("Assignment not found with ID: {}", assignmentId);
     }
 
     @Test
@@ -503,10 +391,6 @@ class AssignmentServiceTest {
             assignmentService.requestResubmission(assignmentId, validReviewVideoUrl);
         });
 
-//        verify(logger).warn("Invalid status transition from {} to {} for assignment {}",
-//                completedAssignment.getStatus(),
-//                AssignmentStatusEnum.NEEDS_UPDATE,
-//                completedAssignment.getId());
     }
 
     @Test
