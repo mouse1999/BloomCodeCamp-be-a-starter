@@ -58,7 +58,7 @@
 #    driver: bridge
 
 
-version: '3.8' # Use a newer version for healthcheck features
+version: '3.8'
 
 services:
   pgdb:
@@ -71,14 +71,14 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
-      # Ensure these paths are correct relative to your docker-compose.yml
+
       - ./docker/pg/postgres.conf:/etc/postgresql/postgresql.conf
       - ./data/pg:/var/lib/postgresql/data
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     networks:
       - postgres
     restart: always
-    healthcheck: # <-- ADD THIS HEALTHCHECK BLOCK
+    healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s # Check every 5 seconds
       timeout: 5s  # Timeout if a check takes longer than 5 seconds
@@ -99,7 +99,7 @@ services:
     networks:
       - postgres
     restart: unless-stopped
-    depends_on: # pgAdmin can also wait for the database to be healthy
+    depends_on: # pgAdmin  waits for the database to be healthy
       pgdb:
         condition: service_healthy
 
@@ -114,7 +114,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
-    depends_on: # <-- MODIFY THIS depends_on BLOCK
+    depends_on:
       pgdb:
         condition: service_healthy # This ensures pgdb is healthy before spring-app starts
     networks:
